@@ -1,0 +1,1 @@
+delivery.timeout.ms sẽ được tính cho message đầu tiên của batch, mặc dù các message sau có thể chưa đủ delivery.timeout.ms nhưng cũng sẽ bị ném ra TIMEOUT_EXEPTION

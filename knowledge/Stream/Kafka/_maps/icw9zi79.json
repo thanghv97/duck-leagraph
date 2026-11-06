@@ -1,0 +1,304 @@
+{
+  "version": 2,
+  "center": "nan0pxj3",
+  "nodes": [
+    {
+      "id": "nan0pxj3",
+      "title": "producers",
+      "x": -2758,
+      "y": -1040,
+      "color": "#1b2330",
+      "filled": true
+    },
+    {
+      "id": "e7iy1q3k",
+      "title": "Issue",
+      "x": -2426,
+      "y": -1363,
+      "color": "#a1396b",
+      "desc": "Làm sao để producer có thể biết được bản tin đã được gửi lên broker hay chưa ?"
+    },
+    {
+      "id": "67fao5sh",
+      "title": "Acknowledgments (ACK)",
+      "x": -2076,
+      "y": -1237,
+      "color": "#3f8f4a",
+      "bookmark": true
+    },
+    {
+      "id": "tn9g85sz",
+      "title": "ACK Strategies",
+      "x": -1576,
+      "y": -1353,
+      "color": "#d99a1c",
+      "desc": "Trade-off giữa reliability và performance",
+      "note": true
+    },
+    {
+      "id": "ofonkurj",
+      "title": "ppt: acks = all (acks = -1)",
+      "x": -1232,
+      "y": -1615,
+      "color": "#0a7d8c",
+      "desc": "(default - Kafka >= 3.0) \nProducer sẽ nhận được repsonse sau khi toàn bộ min.insync.replica được replicated data (OS Page)",
+      "note": false
+    },
+    {
+      "id": "te56i4pr",
+      "title": "ppt: acks = 1",
+      "x": -904,
+      "y": -1424,
+      "color": "#0a7d8c",
+      "desc": "Producer sẽ nhận được repsonse sau khi dữ liệu được ghi nhận vào node leader (OS Page)"
+    },
+    {
+      "id": "t8qaz1pa",
+      "title": "ppt: acks = 0",
+      "x": -870,
+      "y": -1149,
+      "color": "#0a7d8c",
+      "desc": "Producer sẽ nhận được repsonse lập tức mà không cần confirm gì cả"
+    },
+    {
+      "id": "4i9l1j5v",
+      "title": "Issue",
+      "x": -623,
+      "y": -1755,
+      "color": "#a1396b",
+      "desc": "Nếu 2/3 ISR lỗi và min.insync.replica = 2, chuyện gi sẽ xảy ra ?"
+    },
+    {
+      "id": "f0jc44v4",
+      "title": "ppt: min.insync.replicas",
+      "x": -1794,
+      "y": -1735,
+      "color": "#0a7d8c",
+      "desc": "(default: 1) \nSố lượng bản sao (replica) tối thiểu phải nằm trong ISR cần xác nhận đã nhận được data thì việc ghi mới được coi là thành công (dành cho ack = all or -1)"
+    },
+    {
+      "id": "5wghs1mz",
+      "title": "Issue",
+      "x": -1228,
+      "y": -1963,
+      "color": "#a1396b",
+      "desc": "min.insync.replicas (default) or min.insync.replicas = 1 và ISR = 1 \n=> hành vi của acks = all sẽ tương tự với acks = 1"
+    },
+    {
+      "id": "mkbm6fuq",
+      "title": "Issue",
+      "x": -2319,
+      "y": -1053,
+      "color": "#a1396b",
+      "desc": "Chuyện gì xảy ra khi request đã ghi nhận broker thành công nhưng bản tin ACK lại không trả về đến producer (do network, ...) ? \n=> producer retry và lặp lại bản tin lần nữa ?",
+      "note": true
+    },
+    {
+      "id": "ph6wos5f",
+      "title": "Idempotence",
+      "x": -1900,
+      "y": -808,
+      "color": "#3f8f4a",
+      "desc": "Producer sẽ assign 1 sequence ID cho mỗi message, ngoài ra các thuộc tính khác cũng được yêu cầu để đảm bảo tính Idempotence",
+      "note": true,
+      "bookmark": true
+    },
+    {
+      "id": "k2dxjw6b",
+      "title": "ppt: enable.idempotence",
+      "x": -1416,
+      "y": -871,
+      "color": "#0a7d8c",
+      "desc": "(default: true - Kafka >= 3.3) ",
+      "note": true
+    },
+    {
+      "id": "ovtmnjg4",
+      "title": "ppt: max.in.flight.requests.per.connection",
+      "x": -902,
+      "y": -928,
+      "color": "#0a7d8c",
+      "desc": "(default: 5)\nCho phép producer gửi gối đầu số lượng request liên tục trên 1 TCP conenction mà chưa nhận được ACK",
+      "note": true
+    },
+    {
+      "id": "1hws7260",
+      "title": "ppt: retries",
+      "x": -933,
+      "y": -668,
+      "color": "#0a7d8c",
+      "desc": "(default: MAX_INTEGER = 2147483647 - Kafka >= 2.1)\nSố lần max mà producer gửi lại request nếu ack fail"
+    },
+    {
+      "id": "i6d6s3ad",
+      "title": "ppt: delivery.timeout.ms",
+      "x": -478,
+      "y": -749,
+      "color": "#0a7d8c",
+      "desc": "(default: 120.000ms = 2 min)\nThời gian timeout tính từ thời điểm send() cho đến khi nhận được ACK "
+    },
+    {
+      "id": "yvwbnrh2",
+      "title": "Issue",
+      "x": 18,
+      "y": -1006,
+      "color": "#a1396b",
+      "desc": "Nếu 5 message gửi tại các thời điểm khác nhau khi vào hàm send(), sau đó được đóng vào 1 batch \n=> delivery.timeout.ms sẽ được tính như thế nào nếu batch đó bị gửi fail liên tục ",
+      "note": true
+    },
+    {
+      "id": "yelo2bne",
+      "title": "ppt: retry.backoff.ms",
+      "x": -500,
+      "y": -492,
+      "color": "#0a7d8c",
+      "desc": "(default: 100ms) \nKhoảng thời gian Producer tạm nghỉ giữa các lần retry liên tiếp"
+    },
+    {
+      "id": "5duh61au",
+      "title": "Issue",
+      "x": -1638,
+      "y": -545,
+      "color": "#a1396b",
+      "desc": "Chuyện gì xảy ra khi message đến sai thứ tự, B đến trước A, A mãi mãi bị pending gửi lỗi?",
+      "note": true
+    }
+  ],
+  "links": [
+    {
+      "id": "g1ej07io",
+      "a": "e7iy1q3k",
+      "b": "67fao5sh",
+      "dir": "a2b"
+    },
+    {
+      "id": "9dbniqyw",
+      "a": "nan0pxj3",
+      "b": "e7iy1q3k",
+      "dir": "a2b"
+    },
+    {
+      "id": "srb78ih7",
+      "a": "67fao5sh",
+      "b": "tn9g85sz",
+      "dir": "a2b"
+    },
+    {
+      "id": "ehj4hai4",
+      "a": "tn9g85sz",
+      "b": "ofonkurj",
+      "dir": "a2b"
+    },
+    {
+      "id": "pep9ve2p",
+      "a": "tn9g85sz",
+      "b": "te56i4pr",
+      "dir": "a2b"
+    },
+    {
+      "id": "85l73czk",
+      "a": "tn9g85sz",
+      "b": "t8qaz1pa",
+      "dir": "a2b"
+    },
+    {
+      "id": "o2nmpwsu",
+      "a": "f0jc44v4",
+      "b": "ofonkurj"
+    },
+    {
+      "id": "vvqm88cm",
+      "a": "ofonkurj",
+      "b": "4i9l1j5v",
+      "label": "Error: NOT_ENOUGH_REPLICAS",
+      "dir": "a2b"
+    },
+    {
+      "id": "pheuelzx",
+      "a": "te56i4pr",
+      "b": "4i9l1j5v",
+      "label": "Success",
+      "dir": "a2b"
+    },
+    {
+      "id": "v4rwaqmz",
+      "a": "t8qaz1pa",
+      "b": "4i9l1j5v",
+      "label": "Success",
+      "dir": "a2b"
+    },
+    {
+      "id": "gk08ftx0",
+      "a": "f0jc44v4",
+      "b": "5wghs1mz",
+      "dir": "a2b"
+    },
+    {
+      "id": "5yzikw3e",
+      "a": "ofonkurj",
+      "b": "5wghs1mz",
+      "dir": "a2b"
+    },
+    {
+      "id": "2fkc2ac9",
+      "a": "nan0pxj3",
+      "b": "mkbm6fuq",
+      "dir": "a2b"
+    },
+    {
+      "id": "e2ouayon",
+      "a": "67fao5sh",
+      "b": "mkbm6fuq",
+      "dir": "a2b"
+    },
+    {
+      "id": "lhrpymp2",
+      "a": "mkbm6fuq",
+      "b": "ph6wos5f",
+      "dir": "a2b"
+    },
+    {
+      "id": "lyokkyca",
+      "a": "ph6wos5f",
+      "b": "k2dxjw6b"
+    },
+    {
+      "id": "polla3fx",
+      "a": "k2dxjw6b",
+      "b": "ovtmnjg4"
+    },
+    {
+      "id": "i1i3105x",
+      "a": "k2dxjw6b",
+      "b": "1hws7260"
+    },
+    {
+      "id": "ulrhikkm",
+      "a": "1hws7260",
+      "b": "i6d6s3ad"
+    },
+    {
+      "id": "b5a88pp2",
+      "a": "i6d6s3ad",
+      "b": "yvwbnrh2",
+      "dir": "a2b"
+    },
+    {
+      "id": "a2p4ngmd",
+      "a": "1hws7260",
+      "b": "yelo2bne"
+    },
+    {
+      "id": "avpcfkvx",
+      "a": "ph6wos5f",
+      "b": "5duh61au",
+      "dir": "a2b"
+    },
+    {
+      "id": "wqkcv5ud",
+      "a": "k2dxjw6b",
+      "b": "ofonkurj"
+    }
+  ],
+  "parentMap": "root"
+}

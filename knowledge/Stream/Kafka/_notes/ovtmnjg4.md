@@ -1,0 +1,1 @@
+Note: Số lượng request in.flight cho mỗi TCP connection -> 3 Broker -> 3 Connection -> 3 * 5 = 15 request inf.flight

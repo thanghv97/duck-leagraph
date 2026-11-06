@@ -1,0 +1,197 @@
+{
+  "version": 2,
+  "nodes": [
+    {
+      "id": "kafka",
+      "title": "Kafka",
+      "x": -2042,
+      "y": -1244,
+      "color": "#1b2330",
+      "filled": true,
+      "bookmark": false
+    },
+    {
+      "id": "cons",
+      "title": "three components",
+      "x": -2264,
+      "y": -932,
+      "color": "#1b2330",
+      "filled": false,
+      "tags": [],
+      "bookmark": true
+    },
+    {
+      "id": "group",
+      "title": "brokers",
+      "x": -2475,
+      "y": -446,
+      "color": "#c8443f"
+    },
+    {
+      "id": "offset",
+      "title": "coordination cluster",
+      "x": -3077,
+      "y": -728,
+      "color": "#c8443f"
+    },
+    {
+      "id": "jnt021cx",
+      "title": "clients",
+      "x": -1788,
+      "y": -702,
+      "color": "#c8443f"
+    },
+    {
+      "id": "jq2yxh99",
+      "title": "message",
+      "x": -2440,
+      "y": -120,
+      "color": "#c8443f"
+    },
+    {
+      "id": "5tzihnh8",
+      "title": "topic",
+      "x": -3026,
+      "y": -263,
+      "color": "#c8443f"
+    },
+    {
+      "id": "51acnfvf",
+      "title": "Reliability",
+      "x": -1373,
+      "y": -1294,
+      "color": "#3f8f4a",
+      "note": true
+    },
+    {
+      "id": "2ox462wn",
+      "title": "Avaibility",
+      "x": -912,
+      "y": -1387,
+      "color": "#d99a1c"
+    },
+    {
+      "id": "9xzeaqs4",
+      "title": "Data Durability",
+      "x": -859,
+      "y": -1131,
+      "color": "#d99a1c"
+    },
+    {
+      "id": "wy0cmfg2",
+      "title": "Consitency",
+      "x": -974,
+      "y": -1534,
+      "color": "#d99a1c"
+    },
+    {
+      "id": "7gdwau0f",
+      "title": "Issue",
+      "x": -1734,
+      "y": -1533,
+      "color": "#a1396b",
+      "filled": false,
+      "desc": " Chuyện gì xảy ra nếu 1 trong các node broker đột ngột dừng hoạt động?\n"
+    },
+    {
+      "id": "6apxvfgi",
+      "title": "consumers",
+      "x": -2008,
+      "y": -410,
+      "color": "#c8443f"
+    },
+    {
+      "id": "icw9zi79",
+      "title": "producers",
+      "x": -1579,
+      "y": -362,
+      "color": "#c8443f",
+      "sub": true
+    },
+    {
+      "id": "kxnuv4mr",
+      "title": "__consumer_offet",
+      "x": -3444,
+      "y": -55,
+      "color": "#c8443f"
+    }
+  ],
+  "links": [
+    {
+      "id": "aw7durgg",
+      "a": "kafka",
+      "b": "cons"
+    },
+    {
+      "id": "h8oy28v5",
+      "a": "cons",
+      "b": "group"
+    },
+    {
+      "id": "i3p9ybcj",
+      "a": "cons",
+      "b": "offset"
+    },
+    {
+      "id": "4rxr0s9w",
+      "a": "cons",
+      "b": "jnt021cx"
+    },
+    {
+      "id": "v2twajyu",
+      "a": "group",
+      "b": "jq2yxh99"
+    },
+    {
+      "id": "l2i4winh",
+      "a": "group",
+      "b": "5tzihnh8"
+    },
+    {
+      "id": "pjce6vjc",
+      "a": "51acnfvf",
+      "b": "9xzeaqs4"
+    },
+    {
+      "id": "bssvra0f",
+      "a": "51acnfvf",
+      "b": "2ox462wn"
+    },
+    {
+      "id": "egzvj5a7",
+      "a": "51acnfvf",
+      "b": "wy0cmfg2"
+    },
+    {
+      "id": "h6xtdcoy",
+      "a": "kafka",
+      "b": "51acnfvf"
+    },
+    {
+      "id": "hlfmb3u9",
+      "a": "kafka",
+      "b": "7gdwau0f"
+    },
+    {
+      "id": "9dxts8o2",
+      "a": "7gdwau0f",
+      "b": "51acnfvf"
+    },
+    {
+      "id": "3cklv78o",
+      "a": "jnt021cx",
+      "b": "6apxvfgi"
+    },
+    {
+      "id": "a3s08w6k",
+      "a": "jnt021cx",
+      "b": "icw9zi79"
+    },
+    {
+      "id": "p5gvdwnf",
+      "a": "5tzihnh8",
+      "b": "kxnuv4mr"
+    }
+  ],
+  "center": "kafka"
+}

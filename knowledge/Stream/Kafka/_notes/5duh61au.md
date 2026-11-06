@@ -1,0 +1,2 @@
+Nếu 1 message B gửi đến broker sai thứ tự, broker sẽ gửi về bản tin Negative ACK (NACK) -> bản tin B sẽ được chờ cho đến khi nào bản tin A nhận được tín hiệu ACK thì producer sẽ gửi lại bản tin B
+![image](image:mw2gtxvk79sa.png)
