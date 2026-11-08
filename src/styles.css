@@ -172,7 +172,17 @@ button { cursor: pointer; }
 .danger-btn { justify-self: start; margin-top: 4px; padding: 5px 12px; border: 1px solid var(--rule); border-radius: 7px; background: none; color: var(--danger); }
 .danger-btn:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
 
-.link-label { position: absolute; pointer-events: all; cursor: pointer; max-width: 220px; padding: 0 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 5px; background: #fcfcfa; font-family: var(--hand); font-size: 16px; line-height: 22px; color: #3c4656; }
+.link-label { position: absolute; pointer-events: all; cursor: pointer; max-width: none; padding: 0 7px; white-space: nowrap; border-radius: 5px; background: #fcfcfa; font-family: var(--hand); font-size: 16px; line-height: 22px; color: #3c4656; }
 .link-label.is-selected { color: var(--mark); }
 .link-label input { font: inherit; color: inherit; background: transparent; border: 0; outline: 1.5px dashed var(--mark); outline-offset: 1px; padding: 0; min-width: 4ch; }
 .prose img { max-width: 100%; height: auto; border-radius: 6px; }
+
+.tnode.ghost { cursor: default; opacity: .75; }
+.tnode.ghost .sub-badge { pointer-events: none; }
+.link-label.is-ghost { cursor: default; pointer-events: none; opacity: .75; }
+.react-flow__handle.ghost-handle { opacity: 0; pointer-events: none; }
+
+.menu-depth { display: flex; align-items: center; gap: 8px; padding: 4px 12px; font-size: 14px; }
+.menu-depth span { flex: 1; }
+.menu-depth button { width: 26px; height: 26px; padding: 0; text-align: center; }
+.menu-depth b { min-width: 1.5ch; text-align: center; }

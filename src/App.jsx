@@ -20,6 +20,8 @@ export default function App() {
   })
   const { topic, mapId, chain } = loc
   const [map, setMap] = useState(null)
+  // Which topic/map `map` really is. While the next one loads, `map` still holds the previous one.
+  const [loadedKey, setLoadedKey] = useState(null)
   const [selection, setSelection] = useState([])
   // Single-node actions (notes panel, shortcuts) only apply when exactly one node is selected.
   const selectedId = selection.length === 1 ? selection[0] : null
@@ -87,6 +89,7 @@ export default function App() {
       const loaded = upgradeMap(raw, locRef.current.chain.at(-1)?.title || lastSegment(topic))
       mapRef.current = loaded
       setMap(loaded)
+      setLoadedKey(`${topic}:${mapId}`)
       if (selectAfterLoad.current) {
         setSelection([selectAfterLoad.current])
         selectAfterLoad.current = null
@@ -171,8 +174,29 @@ export default function App() {
     addNode({ x: from.x + nodeWidth(from) + 90, y: from.y + used * (NODE_H + 24) }, fromId)
   }, [addNode])
 
+  // Deleting the centre box of a sub-map deletes the whole sub-map and returns to the box that owned it.
+  const deleteCurrentMap = useCallback(async () => {
+    if (!window.confirm('Delete this map and everything inside it?')) return
+    const { topic: t, mapId: cur, chain: c } = locRef.current
+    const parentId = c[c.length - 2]?.id || 'root'
+    clearTimeout(timer.current)
+    pending.current = null
+    try {
+      await api.deleteMap(t, cur)
+      const parent = upgradeMap(await api.getMap(t, parentId), '')
+      await api.saveMap(t, parentId, {
+        ...parent,
+        nodes: parent.nodes.map((n) => { if (n.id !== cur) return n; const { sub: _sub, ...rest } = n; return rest }),
+        links: parent.links.filter((l) => l.via !== cur),
+      })
+      setStatus('idle')
+      setLoc((l) => ({ ...l, mapId: parentId, chain: l.chain.slice(0, -1) }))
+    } catch (e) { fail(e) }
+  }, [fail])
+
   const removeNodes = useCallback((ids) => {
     const m = mapRef.current
+    if (ids.includes(m.center) && locRef.current.mapId !== 'root') { deleteCurrentMap(); return }
     // The centre box anchors the map and stays.
     const gone = new Set(ids.filter((id) => id !== m.center))
     if (!gone.size) return
@@ -184,10 +208,10 @@ export default function App() {
     updateMap((cur) => ({
       ...cur,
       nodes: cur.nodes.filter((n) => !gone.has(n.id)),
-      links: cur.links.filter((l) => !gone.has(l.a) && !gone.has(l.b)),
+      links: cur.links.filter((l) => !gone.has(l.a) && !gone.has(l.b) && !gone.has(l.via)),
     }))
     setSelection([])
-  }, [updateMap, fail])
+  }, [updateMap, fail, deleteCurrentMap])
 
   const addLink = useCallback((a, b) => {
     if (a === b) return
@@ -196,6 +220,22 @@ export default function App() {
       return { ...m, links: [...m.links, { id: uid(), a, b }] }
     })
   }, [updateMap])
+
+  // A link between a box of an outer map and a box inside one of its sub-maps is stored in the outer map.
+  const addCrossLink = useCallback(async (storeId, { outer, inner, via, title }) => {
+    const link = { id: uid(), a: outer, b: inner, via, ...(title ? { bt: title } : {}) }
+    const dup = (l) => l.via === via && l.a === outer && l.b === inner
+    if (storeId === locRef.current.mapId) {
+      updateMap((m) => (m.links.some(dup) ? m : { ...m, links: [...m.links, link] }))
+      return
+    }
+    try {
+      const { topic: t } = locRef.current
+      const other = upgradeMap(await api.getMap(t, storeId), '')
+      if (other.links.some(dup)) return
+      await api.saveMap(t, storeId, { ...other, links: [...other.links, link] })
+    } catch (e) { fail(e) }
+  }, [updateMap, fail])
 
   const removeLink = useCallback((id) => {
     updateMap((m) => ({ ...m, links: m.links.filter((l) => l.id !== id) }))
@@ -298,11 +338,12 @@ export default function App() {
         onJump={jumpTo}
       />
       <main className="stage">
-        {map ? (
+        {map && loadedKey === `${topic}:${mapId}` ? (
           <MapView
             key={`${topic}:${mapId}`}
             topic={topic}
             map={map}
+            mapId={mapId}
             chain={chain}
             goToLevel={goToLevel}
             selection={selection}
@@ -314,7 +355,7 @@ export default function App() {
             editingLink={editingLink}
             setEditingLink={setEditingLink}
             status={status}
-            ops={{ updateMap, addNode, addLinkedNode, removeNodes, addLink, openSubmap, commitTitle, commitLabel }}
+            ops={{ updateMap, addNode, addLinkedNode, removeNodes, addLink, addCrossLink, openSubmap, commitTitle, commitLabel }}
           />
         ) : (
           <div className="empty">
@@ -344,7 +385,7 @@ export default function App() {
           key={pickedLink.id}
           link={pickedLink}
           from={map.nodes.find((n) => n.id === pickedLink.a)}
-          to={map.nodes.find((n) => n.id === pickedLink.b)}
+          to={map.nodes.find((n) => n.id === pickedLink.b) || { title: pickedLink.bt || 'Box in sub-map' }}
           onPatch={(patch) => patchLink(pickedLink.id, patch)}
           onRemove={() => removeLink(pickedLink.id)}
           onClose={() => setSelectedLink(null)}
