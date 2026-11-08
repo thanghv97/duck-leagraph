@@ -12,20 +12,21 @@
     },
     {
       "id": "cons",
-      "title": "three components",
+      "title": "Three components",
       "x": -2264,
       "y": -932,
       "color": "#1b2330",
       "filled": false,
       "tags": [],
-      "bookmark": true
+      "bookmark": false
     },
     {
       "id": "group",
       "title": "brokers",
-      "x": -2475,
-      "y": -446,
-      "color": "#c8443f"
+      "x": -2800,
+      "y": -517,
+      "color": "#c8443f",
+      "sub": true
     },
     {
       "id": "offset",
@@ -36,7 +37,7 @@
     },
     {
       "id": "jnt021cx",
-      "title": "clients",
+      "title": "Clients",
       "x": -1788,
       "y": -702,
       "color": "#c8443f"
@@ -44,15 +45,15 @@
     {
       "id": "jq2yxh99",
       "title": "message",
-      "x": -2440,
-      "y": -120,
+      "x": -3088,
+      "y": -44,
       "color": "#c8443f"
     },
     {
       "id": "5tzihnh8",
       "title": "topic",
-      "x": -3026,
-      "y": -263,
+      "x": -3348,
+      "y": -414,
       "color": "#c8443f"
     },
     {
@@ -95,47 +96,70 @@
     },
     {
       "id": "6apxvfgi",
-      "title": "consumers",
+      "title": "Consumers",
       "x": -2008,
       "y": -410,
-      "color": "#c8443f"
+      "color": "#c8443f",
+      "sub": true,
+      "bookmark": true
     },
     {
       "id": "icw9zi79",
-      "title": "producers",
-      "x": -1579,
-      "y": -362,
+      "title": "Producers",
+      "x": -1578,
+      "y": -304,
       "color": "#c8443f",
-      "sub": true
+      "sub": true,
+      "bookmark": true
     },
     {
       "id": "kxnuv4mr",
       "title": "__consumer_offet",
-      "x": -3444,
-      "y": -55,
+      "x": -3775,
+      "y": -33,
       "color": "#c8443f"
+    },
+    {
+      "id": "fv6yb81f",
+      "title": "Use Case",
+      "x": -1834,
+      "y": -44,
+      "color": "#d4651f",
+      "desc": "Pattern Consume-Transform-Produce"
+    },
+    {
+      "id": "kcbqksmh",
+      "title": "Transaction",
+      "x": -2545,
+      "y": 796,
+      "color": "#3f8f4a",
+      "desc": "Transaction trong Kafka cho phép ghi atomic đến 2 hoặc nhiều partition. Tất cả message thành công hoặc không"
     }
   ],
   "links": [
     {
       "id": "aw7durgg",
       "a": "kafka",
-      "b": "cons"
+      "b": "cons",
+      "dir": "a2b"
     },
     {
       "id": "h8oy28v5",
       "a": "cons",
-      "b": "group"
+      "b": "group",
+      "dir": "a2b"
     },
     {
       "id": "i3p9ybcj",
       "a": "cons",
-      "b": "offset"
+      "b": "offset",
+      "dir": "a2b"
     },
     {
       "id": "4rxr0s9w",
       "a": "cons",
-      "b": "jnt021cx"
+      "b": "jnt021cx",
+      "dir": "a2b"
     },
     {
       "id": "v2twajyu",
@@ -180,17 +204,68 @@
     {
       "id": "3cklv78o",
       "a": "jnt021cx",
-      "b": "6apxvfgi"
+      "b": "6apxvfgi",
+      "dir": "a2b"
     },
     {
       "id": "a3s08w6k",
       "a": "jnt021cx",
-      "b": "icw9zi79"
+      "b": "icw9zi79",
+      "dir": "a2b"
     },
     {
       "id": "p5gvdwnf",
       "a": "5tzihnh8",
       "b": "kxnuv4mr"
+    },
+    {
+      "id": "ejt8kamp",
+      "a": "icw9zi79",
+      "b": "fv6yb81f",
+      "dir": "a2b"
+    },
+    {
+      "id": "qh1x916s",
+      "a": "6apxvfgi",
+      "b": "fv6yb81f",
+      "dir": "a2b"
+    },
+    {
+      "id": "vsq3edqm",
+      "a": "fv6yb81f",
+      "b": "3tygy8i6",
+      "via": "icw9zi79",
+      "bt": "Issue",
+      "dir": "a2b"
+    },
+    {
+      "id": "0osnko36",
+      "a": "group",
+      "b": "rj1vys0n",
+      "via": "icw9zi79",
+      "bt": "Transaction"
+    },
+    {
+      "id": "w5cmfk0t",
+      "a": "kcbqksmh",
+      "b": "2kvuhnwu",
+      "via": "6apxvfgi",
+      "bt": "Issue",
+      "dir": "a2b"
+    },
+    {
+      "id": "zsyk6fy3",
+      "a": "group",
+      "b": "kcbqksmh",
+      "dir": "a2b"
+    },
+    {
+      "id": "esvpc7y7",
+      "a": "kcbqksmh",
+      "b": "cf2u39o8",
+      "via": "icw9zi79",
+      "bt": "Transaction Strategies",
+      "dir": "b2a"
     }
   ],
   "center": "kafka"

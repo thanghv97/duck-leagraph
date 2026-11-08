@@ -13,8 +13,8 @@
     {
       "id": "e7iy1q3k",
       "title": "Issue",
-      "x": -2426,
-      "y": -1363,
+      "x": -2498,
+      "y": -1384,
       "color": "#a1396b",
       "desc": "Làm sao để producer có thể biết được bản tin đã được gửi lên broker hay chưa ?"
     },
@@ -32,7 +32,7 @@
       "x": -1576,
       "y": -1353,
       "color": "#d99a1c",
-      "desc": "Trade-off giữa reliability và performance",
+      "desc": "Trade-off giữa reliability và performance\n+ acks = all or acks = - 1\n+ acks = 0\n+ acks = 1",
       "note": true
     },
     {
@@ -87,8 +87,8 @@
     {
       "id": "mkbm6fuq",
       "title": "Issue",
-      "x": -2319,
-      "y": -1053,
+      "x": -2328,
+      "y": -1016,
       "color": "#a1396b",
       "desc": "Chuyện gì xảy ra khi request đã ghi nhận broker thành công nhưng bản tin ACK lại không trả về đến producer (do network, ...) ? \n=> producer retry và lặp lại bản tin lần nữa ?",
       "note": true
@@ -115,8 +115,8 @@
     {
       "id": "ovtmnjg4",
       "title": "ppt: max.in.flight.requests.per.connection",
-      "x": -902,
-      "y": -928,
+      "x": -685,
+      "y": -960,
       "color": "#0a7d8c",
       "desc": "(default: 5)\nCho phép producer gửi gối đầu số lượng request liên tục trên 1 TCP conenction mà chưa nhận được ACK",
       "note": true
@@ -162,6 +162,32 @@
       "color": "#a1396b",
       "desc": "Chuyện gì xảy ra khi message đến sai thứ tự, B đến trước A, A mãi mãi bị pending gửi lỗi?",
       "note": true
+    },
+    {
+      "id": "3tygy8i6",
+      "title": "Issue",
+      "x": -2409,
+      "y": -524,
+      "color": "#a1396b",
+      "desc": "Khi thực hiện produce, làm sao để đảm bảo tính atomic cho multiple topic (vd topic A, __consumer_offset)",
+      "note": true
+    },
+    {
+      "id": "cf2u39o8",
+      "title": "Transaction Strategies",
+      "x": -2342,
+      "y": -142,
+      "color": "#d99a1c",
+      "desc": "Trade-off giữa performance và complexity\n+ Transaction (use Kafka transactions)\n+ No Transaction (self-implemented)",
+      "note": true
+    },
+    {
+      "id": "o7n3cf4l",
+      "title": "ppt: enable.auto.commit",
+      "x": -1758,
+      "y": 46,
+      "color": "#0a7d8c",
+      "desc": "(default: true) "
     }
   ],
   "links": [
@@ -298,6 +324,24 @@
       "id": "wqkcv5ud",
       "a": "k2dxjw6b",
       "b": "ofonkurj"
+    },
+    {
+      "id": "ils6f9fw",
+      "a": "nan0pxj3",
+      "b": "3tygy8i6"
+    },
+    {
+      "id": "bkqsfe62",
+      "a": "3tygy8i6",
+      "b": "cf2u39o8",
+      "dir": "a2b"
+    },
+    {
+      "id": "4l62zbmb",
+      "a": "cf2u39o8",
+      "b": "o7n3cf4l",
+      "dir": "a2b",
+      "label": "set enable.auto.commit = false khi sử dụng Transaction"
     }
   ],
   "parentMap": "root"

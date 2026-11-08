@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "center": "8jl9ifgg",
+  "nodes": [
+    {
+      "id": "8jl9ifgg",
+      "title": "consumers",
+      "x": 104,
+      "y": 3,
+      "color": "#1b2330",
+      "filled": true
+    },
+    {
+      "id": "8b5u3d0p",
+      "title": "PPT: isolation.level",
+      "x": 191,
+      "y": 971,
+      "color": "#0a7d8c",
+      "desc": "(default: read_uncommited)"
+    },
+    {
+      "id": "2kvuhnwu",
+      "title": "Issue",
+      "x": -44,
+      "y": 516,
+      "color": "#a1396b",
+      "desc": "Nếu producer thực hiện transaction để send message vào partition, consumer cần xác định hành vi để có thể consume đúng bản tin, tránh trường hợp consume bản tin uncommit không như mong muốn."
+    }
+  ],
+  "links": [
+    {
+      "id": "qp8v49ux",
+      "a": "2kvuhnwu",
+      "b": "8b5u3d0p",
+      "dir": "a2b",
+      "label": "set isolation.level = read_commited"
+    },
+    {
+      "id": "2pjq609u",
+      "a": "8jl9ifgg",
+      "b": "2kvuhnwu",
+      "dir": "a2b"
+    }
+  ],
+  "parentMap": "root"
+}
