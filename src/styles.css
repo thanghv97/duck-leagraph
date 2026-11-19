@@ -43,6 +43,9 @@ button { cursor: pointer; }
 .row:hover .actions, .row:focus-within .actions { display: flex; }
 .row .actions button { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 6px; color: var(--graphite); }
 .row .actions button:hover { background: #d9d8f3; color: var(--ink); }
+.row .lock { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 6px; color: var(--graphite); flex: none; }
+.row .lock:hover { background: #d9d8f3; color: var(--ink); }
+.row .lock.open { color: #1f8a4c; }
 .name-input { width: 100%; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--mark); background: #fff; color: var(--ink); }
 .row.confirm { flex-wrap: wrap; padding: 8px 10px; font-size: 13px; gap: 8px; }
 .row.confirm span { flex-basis: 100%; }
@@ -186,3 +189,16 @@ button { cursor: pointer; }
 .menu-depth span { flex: 1; }
 .menu-depth button { width: 26px; height: 26px; padding: 0; text-align: center; }
 .menu-depth b { min-width: 1.5ch; text-align: center; }
+
+/* Playthrough */
+.canvas.playing .react-flow { background: #14171d; transition: background .3s; }
+.react-flow__node, .react-flow__edge { transition: opacity .35s; }
+.react-flow__node.play-dim, .react-flow__edge.play-dim { opacity: .12; pointer-events: none; }
+.link-label.play-dim { opacity: .12; pointer-events: none; }
+.react-flow__node.play-lit .tnode { background: #fdfdfb; border-radius: 6px; cursor: pointer; }
+.react-flow__node.play-cur .tnode { box-shadow: 0 0 0 3px rgba(244, 241, 230, .35), 0 0 28px rgba(244, 241, 230, .4); }
+.play-bar { position: absolute; z-index: 6; left: 50%; bottom: 20px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--rule); border-radius: 12px; padding: 6px 10px; }
+.play-bar span { font-family: var(--hand); font-size: 18px; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.play-bar button { background: none; border: 0; padding: 5px 10px; border-radius: 7px; }
+.play-bar button:not(:disabled):hover { background: var(--paper); }
+.play-bar button:disabled { opacity: .4; }

@@ -1,7 +1,11 @@
+// Edit token from the password prompt. Kept in memory on purpose: reloading the page locks editing again.
+let editToken = null
+export const setEditToken = (t) => { editToken = t }
+
 async function call(method, url, body) {
   const res = await fetch(url, {
     method,
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(editToken ? { 'X-Edit-Token': editToken } : {}) },
     body: body ? JSON.stringify(body) : undefined,
     // Lets a save started while the page is closing or reloading still reach the server.
     keepalive: method === 'PUT',
@@ -14,6 +18,7 @@ async function call(method, url, body) {
 const q = (params) => new URLSearchParams(params).toString()
 
 export const api = {
+  unlock: (password) => call('POST', '/api/unlock', { password }),
   tree: () => call('GET', '/api/tree'),
   createFolder: (path) => call('POST', '/api/folder', { path }),
   renameFolder: (from, to) => call('POST', '/api/rename', { from, to }),
@@ -26,7 +31,7 @@ export const api = {
   deleteNote: (path, id) => call('DELETE', `/api/note?${q({ path, id })}`),
   // Stores a pasted image next to the topic's notes and returns the file name to reference from markdown.
   uploadImage: async (path, blob) => {
-    const res = await fetch(`/api/image?${q({ path })}`, { method: 'PUT', headers: { 'Content-Type': blob.type }, body: blob })
+    const res = await fetch(`/api/image?${q({ path })}`, { method: 'PUT', headers: { 'Content-Type': blob.type, ...(editToken ? { 'X-Edit-Token': editToken } : {}) }, body: blob })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`)
     return data.name

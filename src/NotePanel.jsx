@@ -18,13 +18,15 @@ DOMPurify.addHook('afterSanitizeAttributes', (el) => {
   }
 })
 
-export default function NotePanel({ topic, node, onPatch, onClose, onError }) {
+export default function NotePanel({ topic, node, onPatch, onClose, onError, readOnly }) {
   const [text, setText] = useState('')
   const [ready, setReady] = useState(false)
   const [mode, setMode] = useState('write')
   const [title, setTitle] = useState(node.title)
   const [tags, setTags] = useState((node.tags || []).join(', '))
 
+  const readOnlyRef = useRef(readOnly)
+  readOnlyRef.current = readOnly
   const pending = useRef(null)
   const timer = useRef()
 
@@ -41,7 +43,7 @@ export default function NotePanel({ topic, node, onPatch, onClose, onError }) {
     api.getNote(topic, node.id).then((r) => {
       if (!live) return
       setText(r.content)
-      setMode(r.content ? 'preview' : 'write')
+      setMode(r.content || readOnlyRef.current ? 'preview' : 'write')
       setReady(true)
     }).catch(onError)
     return () => { live = false; flush() }
@@ -98,6 +100,7 @@ ${text.slice(at)}`
           className="note-title"
           value={title}
           aria-label="Node title"
+          readOnly={readOnly}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={() => title.trim() ? onPatch({ title: title.trim() }) : setTitle(node.title)}
           onKeyDown={(e) => e.key === 'Enter' && e.target.blur()}
@@ -105,6 +108,7 @@ ${text.slice(at)}`
         <button
           className={`bookmark ${node.bookmark ? 'on' : ''}`}
           aria-pressed={!!node.bookmark}
+          disabled={readOnly}
           title={node.bookmark ? 'Remove bookmark' : 'Bookmark this box'}
           aria-label="Bookmark"
           onClick={() => onPatch({ bookmark: !node.bookmark })}
@@ -117,6 +121,7 @@ ${text.slice(at)}`
       </header>
 
       <div className="meta">
+        <fieldset disabled={readOnly} style={{ border: 0, padding: 0, margin: 0, minWidth: 0, display: 'contents' }}>
         <label className="stack">
           Description
           <textarea className="desc-input" rows={2} value={node.desc || ''} placeholder="Shown on the box under the title" onChange={(e) => onPatch({ desc: e.target.value })} />
@@ -136,10 +141,11 @@ ${text.slice(at)}`
             <button key={c} role="radio" aria-checked={node.color === c} className={node.color === c ? 'on' : ''} style={{ background: c }} onClick={() => onPatch({ color: c })} title={c} />
           ))}
         </div>
+        </fieldset>
       </div>
 
       <div className="tabs" role="tablist">
-        <button role="tab" aria-selected={mode === 'write'} onClick={() => setMode('write')}>Write</button>
+        {!readOnly && <button role="tab" aria-selected={mode === 'write'} onClick={() => setMode('write')}>Write</button>}
         <button role="tab" aria-selected={mode === 'preview'} onClick={() => setMode('preview')}>Preview</button>
         {node.link && <a href={node.link} target="_blank" rel="noopener noreferrer">Open link</a>}
       </div>
@@ -152,6 +158,7 @@ ${text.slice(at)}`
           value={text}
           placeholder={'Write notes in Markdown.\n\n```sql\nSELECT 1;\n```'}
           ref={editor}
+          readOnly={readOnly}
           onChange={(e) => onText(e.target.value)}
           onPaste={(e) => onFiles(e, e.clipboardData.files)}
           onDrop={(e) => onFiles(e, e.dataTransfer.files)}
@@ -160,7 +167,7 @@ ${text.slice(at)}`
       ) : text ? (
         <div className="prose" dangerouslySetInnerHTML={{ __html: html }} />
       ) : (
-        <p className="hint">No notes yet. Switch to Write to add some.</p>
+        <p className="hint">{readOnly ? 'No notes yet.' : 'No notes yet. Switch to Write to add some.'}</p>
       )}
     </aside>
   )

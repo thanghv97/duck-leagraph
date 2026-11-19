@@ -18,7 +18,7 @@ function DirIcon({ heads }) {
   )
 }
 
-export default function LinkPanel({ link, from, to, onPatch, onRemove, onClose }) {
+export default function LinkPanel({ link, from, to, onPatch, onRemove, onClose, readOnly }) {
   const [label, setLabel] = useState(link.label || '')
   const dir = link.dir || 'none'
 
@@ -32,6 +32,7 @@ export default function LinkPanel({ link, from, to, onPatch, onRemove, onClose }
       </header>
 
       <div className="meta">
+        <fieldset disabled={readOnly} style={{ border: 0, padding: 0, margin: 0, minWidth: 0, display: 'contents' }}>
         <p className="link-ends">{from?.title} — {to?.title}</p>
         <label className="stack">
           Label
@@ -53,7 +54,8 @@ export default function LinkPanel({ link, from, to, onPatch, onRemove, onClose }
             ))}
           </div>
         </div>
-        <button className="danger-btn" onClick={onRemove}>Delete link</button>
+        {!readOnly && <button className="danger-btn" onClick={onRemove}>Delete link</button>}
+        </fieldset>
       </div>
     </aside>
   )

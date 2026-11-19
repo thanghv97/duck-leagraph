@@ -28,8 +28,8 @@ function SketchEdge({ id, source, target, selected, data }) {
   if (!from || !to) return null
   const a = rectOf(from)
   const b = rectOf(to)
-  const { linkId, label, editing, dir, ghost } = data
-  const paths = connectorPaths({ id, from: a, to: b, color: ghost ? GHOST_COLOR : selected ? SELECT_COLOR : LINK_COLOR, width: ghost ? 1.8 : selected ? 3.2 : 2.4, dir, route })
+  const { linkId, label, editing, dir, ghost, playLit, playing } = data
+  const paths = connectorPaths({ id, from: a, to: b, color: ghost ? GHOST_COLOR : playLit ? '#f4f1e6' : selected ? SELECT_COLOR : LINK_COLOR, width: ghost ? 1.8 : selected ? 3.2 : 2.4, dir, route })
   const { x, y } = linkMid(a, b, route)
   return (
     <>
@@ -45,7 +45,7 @@ function SketchEdge({ id, source, target, selected, data }) {
     {(label || editing) && (
       <EdgeLabelRenderer>
         <div
-          className={`link-label nodrag nopan ${selected ? 'is-selected' : ''} ${ghost ? 'is-ghost' : ''}`}
+          className={`link-label nodrag nopan ${selected ? 'is-selected' : ''} ${ghost ? 'is-ghost' : ''} ${playing && !playLit ? 'play-dim' : ''}`}
           style={{ transform: `translate(-50%, -50%) translate(${x}px, ${y}px)` }}
           onClick={ghost ? undefined : () => ctx.selectLink(linkId)}
           onDoubleClick={ghost ? undefined : (e) => { e.stopPropagation(); ctx.editLink(linkId) }}
@@ -136,9 +136,9 @@ function TopicNode({ data }) {
 
       {selected && single && !editing && (
         <div className="node-tools nodrag nopan" onDoubleClick={(e) => e.stopPropagation()}>
-          <button onClick={() => ctx.addLinked(id)}>Add linked box</button>
-          <button onClick={() => ctx.openMap(id)}>{sub ? 'Open map' : 'Open as map'}</button>
-          {(!center || ctx.inSubMap) && <button className="danger" onClick={() => ctx.remove(id)}>{center ? 'Delete map' : 'Delete'}</button>}
+          {ctx.editable && <button onClick={() => ctx.addLinked(id)}>Add linked box</button>}
+          {(sub || ctx.editable) && <button onClick={() => ctx.openMap(id)}>{sub ? 'Open map' : 'Open as map'}</button>}
+          {ctx.editable && (!center || ctx.inSubMap) && <button className="danger" onClick={() => ctx.remove(id)}>{center ? 'Delete map' : 'Delete'}</button>}
         </div>
       )}
     </div>
@@ -187,12 +187,16 @@ function GhostNode({ data }) {
 const nodeTypes = { topic: TopicNode, ghost: GhostNode }
 const edgeTypes = { sketch: SketchEdge }
 
-function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, selectedLink, setSelectedLink, editingId, setEditingId, editingLink, setEditingLink, status, ops }) {
+function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, selectedLink, setSelectedLink, editingId, setEditingId, editingLink, setEditingLink, status, editable, onPlaying, ops }) {
   const { fitView, screenToFlowPosition, setCenter, getZoom } = useReactFlow()
   const canvasRef = useRef(null)
   const [viewOpen, setViewOpen] = useState(false)
   const viewRef = useRef(null)
   const bookmarks = map.nodes.filter((n) => n.bookmark)
+  // Playthrough: everything goes dark except the box we are standing on. Clicking it lights the boxes linked
+  // directly to it, clicking one of those moves on. `trail` is the history, so Back returns to the earlier spot.
+  const [trail, setTrail] = useState(null) // null = off, else [{ id, open }]
+  const play = trail ? trail[trail.length - 1] : null
   // Descriptions are wrapped by measuring text, so measure again once the hand-written font has loaded.
   const [fontTick, setFontTick] = useState(0)
   useEffect(() => {
@@ -405,6 +409,68 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
     data: { linkId: l.id, label: l.label || '', editing: l.id === editingLink, dir: l.dir || 'none' },
   })), ...ghosts.edges], [map.links, selectedLink, editingLink, ghosts])
 
+  const litIds = useMemo(() => {
+    if (!play) return null
+    const lit = new Set([play.id])
+    if (play.open) {
+      map.links.forEach((l) => {
+        if (l.via) return
+        if (l.a === play.id) lit.add(l.b)
+        if (l.b === play.id) lit.add(l.a)
+      })
+    }
+    return lit
+  }, [play, map.links])
+  const viewNodes = useMemo(() => (litIds ? nodes.map((n) => {
+    const lit = litIds.has(n.id)
+    return { ...n, className: lit ? `play-lit ${n.id === play.id ? 'play-cur' : ''}` : 'play-dim' }
+  }) : nodes), [nodes, litIds, play])
+  const viewEdges = useMemo(() => (litIds ? edges.map((e) => {
+    const lit = !e.data.ghost && play.open && (e.source === play.id || e.target === play.id) && litIds.has(e.source) && litIds.has(e.target)
+    return { ...e, className: lit ? 'play-lit' : 'play-dim', data: { ...e.data, playLit: lit, playing: true } }
+  }) : edges), [edges, litIds, play])
+
+  const startPlay = () => {
+    setViewOpen(false)
+    setSelection([])
+    setSelectedLink(null)
+    setEditingId(null)
+    setEditingLink(null)
+    setTrail([{ id: map.center, open: false }])
+  }
+  const onPlayClick = (_, node) => {
+    if (!play || !litIds.has(node.id)) return
+    if (node.id === play.id) {
+      if (!play.open) setTrail((t) => [...t.slice(0, -1), { id: node.id, open: true }])
+      return
+    }
+    setTrail((t) => [...t, { id: node.id, open: true }])
+  }
+  // The box we stand on shows its notes in the side panel (if it has any), read-only.
+  const playId = play?.id
+  const playNote = !!(playId && map.nodes.find((n) => n.id === playId)?.note)
+  useEffect(() => { onPlaying(!!trail) }, [trail, onPlaying])
+  useEffect(() => () => onPlaying(false), [onPlaying])
+  useEffect(() => {
+    if (!playId) return
+    setSelection(playNote ? [playId] : [])
+  }, [playId, playNote, setSelection])
+  useEffect(() => { if (!trail) setSelection([]) }, [!!trail]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Frame the lit boxes whenever the spot changes, and again once the notes panel has resized the canvas.
+  useEffect(() => {
+    if (!litIds) return
+    const fit = () => fitView({ nodes: [...litIds].map((id) => ({ id })), padding: 0.4, maxZoom: 1.2, duration: 450 })
+    fit()
+    const t = setTimeout(fit, 350)
+    return () => clearTimeout(t)
+  }, [litIds, fitView, playNote])
+  useEffect(() => {
+    if (!trail) return
+    const onKey = (e) => { if (e.key === 'Escape' && !e.target.closest?.('input, textarea')) setTrail(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [trail])
+
   // One-off: route every connector around the boxes as they are now. Later moves do not touch the routes.
   const rearrangeLinks = () => {
     setViewOpen(false)
@@ -472,6 +538,7 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
 
   // Double-click on empty canvas drops a new box there.
   const onCanvasDoubleClick = (e) => {
+    if (trail) return
     if (!e.target.classList.contains('react-flow__pane')) return
     const p = screenToFlowPosition({ x: e.clientX, y: e.clientY })
     ops.addNode({ x: p.x - 70, y: p.y - NODE_H / 2 })
@@ -500,7 +567,7 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
   }
 
   const ctx = useMemo(() => ({
-    edit: setEditingId,
+    edit: (id) => { if (!trail) setEditingId(id) },
     commit: ops.commitTitle,
     addLinked: ops.addLinkedNode,
     remove: (id) => ops.removeNodes([id]),
@@ -510,11 +577,12 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
     commitLabel: ops.commitLabel,
     routes,
     inSubMap: mapId !== 'root',
-  }), [routes, mapId, ops, setEditingId, setSelectedLink, setSelection, setEditingLink])
+    editable: editable && !trail,
+  }), [routes, mapId, ops, editable, trail, setEditingId, setSelectedLink, setSelection, setEditingLink])
 
   return (
     <MapCtx.Provider value={ctx}>
-      <div className="canvas" ref={canvasRef} onDoubleClick={onCanvasDoubleClick}>
+      <div className={`canvas ${trail ? 'playing' : ''}`} ref={canvasRef} onDoubleClick={onCanvasDoubleClick}>
         <div className="topbar">
           <nav className="crumbs" aria-label="Map levels">
             <span className="topic-path">{topic.replace(/\//g, ' › ')}</span>
@@ -524,7 +592,8 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
           </nav>
           <div className="tools">
             <span className={`save ${status}`}>{status === 'saving' ? 'Saving…' : status === 'saved' ? 'Saved' : ''}</span>
-            <button onClick={addAtCentre}>Add box</button>
+            <button onClick={startPlay}>Playthrough</button>
+            {editable && <button onClick={addAtCentre}>Add box</button>}
             <div className="view-menu" ref={viewRef}>
               <button aria-haspopup="menu" aria-expanded={viewOpen} onClick={() => setViewOpen((o) => !o)}>View ▾</button>
               {viewOpen && (
@@ -549,19 +618,30 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
             </div>
           </div>
         </div>
-        {map.nodes.length === 0 && <p className="canvas-hint">Double-click anywhere to add a box.</p>}
+        {trail && (
+          <div className="play-bar" role="toolbar" aria-label="Playthrough">
+            <button disabled={trail.length < 2} onClick={() => setTrail((t) => t.slice(0, -1))}>← Back</button>
+            <span>{map.nodes.find((n) => n.id === play.id)?.title}{play.open ? '' : ' · click to light its links'}</span>
+            <button onClick={() => setTrail(null)}>Exit</button>
+          </div>
+        )}
+        {map.nodes.length === 0 && editable && <p className="canvas-hint">Double-click anywhere to add a box.</p>}
         <ReactFlow
-          nodes={nodes}
-          edges={edges}
+          nodes={viewNodes}
+          edges={viewEdges}
+          onNodeClick={onPlayClick}
+          elementsSelectable={!trail}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
+          nodesDraggable={editable && !trail}
+          nodesConnectable={editable && !trail}
           connectionMode={ConnectionMode.Loose}
           isValidConnection={(c) => c.source !== c.target && !(isGhost(c.source) && isGhost(c.target))}
           onConnect={onConnect}
           connectionLineStyle={{ stroke: SELECT_COLOR, strokeWidth: 2.4, strokeDasharray: '7 5' }}
           onEdgeDoubleClick={(_, e) => ctx.editLink(e.data.linkId)}
-          onEdgeClick={(_, e) => { setSelectedLink(e.data.linkId); setSelection([]) }}
+          onEdgeClick={(_, e) => { if (trail) return; setSelectedLink(e.data.linkId); setSelection([]) }}
           onPaneClick={() => setSelectedLink(null)}
           fitView
           fitViewOptions={{ padding: 0.25, maxZoom: 1.1 }}

@@ -2,6 +2,7 @@ import express from 'express'
 import fs from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
+import crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -17,6 +18,34 @@ const RESERVED = new Set([NOTES_DIR, MAPS_DIR])
 
 const app = express()
 app.use(express.json({ limit: '5mb' }))
+
+// Editing is locked until a client unlocks with the password. Tokens live in memory only, so a server restart
+// locks everyone, and the page keeps its token in memory only, so a reload locks that session again.
+const EDIT_PASSWORD = process.env.EDIT_PASSWORD || 'duck-edit'
+if (!process.env.EDIT_PASSWORD) console.warn('EDIT_PASSWORD is not set, using the default password. Set it before exposing the app.')
+const editTokens = new Set()
+const safeEqual = (a, b) => {
+  const ha = crypto.createHash('sha256').update(String(a)).digest()
+  const hb = crypto.createHash('sha256').update(String(b)).digest()
+  return crypto.timingSafeEqual(ha, hb)
+}
+let lastFail = 0
+app.post('/api/unlock', (req, res) => {
+  // Slow down password guessing.
+  if (Date.now() - lastFail < 1000) return res.status(429).json({ error: 'Too many attempts, try again in a moment' })
+  if (!safeEqual(req.body?.password ?? '', EDIT_PASSWORD)) {
+    lastFail = Date.now()
+    return res.status(401).json({ error: 'Wrong password' })
+  }
+  const token = crypto.randomBytes(24).toString('hex')
+  editTokens.add(token)
+  res.json({ token })
+})
+app.use('/api', (req, res, next) => {
+  if (req.method === 'GET' || req.method === 'HEAD') return next()
+  if (!editTokens.has(req.get('x-edit-token'))) return res.status(401).json({ error: 'Editing is locked. Enter the password to edit.' })
+  next()
+})
 
 class HttpError extends Error {
   constructor(status, message) {

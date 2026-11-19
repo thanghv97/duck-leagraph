@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "concurrently -k -n api,web \"node --watch server/index.js\" \"vite\"",
     "build": "vite build",
-    "start": "vite build && node server/index.js"
+    "start": "vite build && node server/index.js",
+    "tunnel": "ngrok http 8080 --url https://reuse-vending-staining.ngrok-free.dev",
+    "dev:public": "concurrently -k -n api,web,ngrok \"node --watch server/index.js\" \"vite\" \"npm run tunnel\""
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.1.0",

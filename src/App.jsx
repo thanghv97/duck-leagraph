@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { api } from './api.js'
+import { api, setEditToken } from './api.js'
 import { NODE_H, PALETTE, nodeWidth, uid, upgradeMap } from './layout.js'
 import Sidebar from './Sidebar.jsx'
 import MapView from './MapView.jsx'
@@ -26,8 +26,33 @@ export default function App() {
   // Single-node actions (notes panel, shortcuts) only apply when exactly one node is selected.
   const selectedId = selection.length === 1 ? selection[0] : null
   const [selectedLink, setSelectedLink] = useState(null)
-  const [editingId, setEditingId] = useState(null)
-  const [editingLink, setEditingLink] = useState(null)
+  const [playing, setPlaying] = useState(false) // playthrough: view only, shortcuts off
+  // The password is asked once per page load (`authed`); after that each topic has its own lock. Every topic starts
+  // locked and nothing is persisted, so a reload locks everything again.
+  const [authed, setAuthed] = useState(false)
+  const [openTopics, setOpenTopics] = useState(() => new Set())
+  const editable = authed && !!topic && openTopics.has(topic)
+  const editRef = useRef(false)
+  editRef.current = editable
+  const authRef = useRef(false)
+  authRef.current = authed
+  const openRef = useRef(openTopics)
+  openRef.current = openTopics
+  const toggleLock = useCallback((path) => setOpenTopics((s) => {
+    const next = new Set(s)
+    if (next.has(path)) next.delete(path)
+    else next.add(path)
+    return next
+  }), [])
+  const [editingId, setEditingIdRaw] = useState(null)
+  const [editingLink, setEditingLinkRaw] = useState(null)
+  const setEditingId = useCallback((v) => { if (v === null || editRef.current) setEditingIdRaw(v) }, [])
+  const setEditingLink = useCallback((v) => { if (v === null || editRef.current) setEditingLinkRaw(v) }, [])
+  const unlock = useCallback(async (password) => {
+    const { token } = await api.unlock(password)
+    setEditToken(token)
+    setAuthed(true)
+  }, [])
   const [status, setStatus] = useState('idle') // idle | saving | saved
   const [error, setError] = useState(null)
 
@@ -55,6 +80,7 @@ export default function App() {
   }, [fail])
 
   const updateMap = useCallback((fn) => {
+    if (!editRef.current) return
     const next = fn(mapRef.current)
     if (next === mapRef.current) return
     mapRef.current = next
@@ -105,15 +131,18 @@ export default function App() {
 
   // ---- topic (menu) operations ----
   const createTopic = async (parent, name) => {
+    if (!authRef.current) return
     const path = parent ? `${parent}/${name}` : name
     try {
       await api.createFolder(path)
+      setOpenTopics((s) => new Set(s).add(path)) // a topic you just made is yours to edit
       await reloadTree()
       openTopic(path)
     } catch (e) { fail(e) }
   }
 
   const renameTopic = async (path, name) => {
+    if (!authRef.current || !openRef.current.has(path)) return
     const parent = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : ''
     const to = parent ? `${parent}/${name}` : name
     if (to === path) return
@@ -129,6 +158,7 @@ export default function App() {
   }
 
   const deleteTopic = async (path) => {
+    if (!authRef.current || !openRef.current.has(path)) return
     try {
       await api.deleteFolder(path)
       await reloadTree()
@@ -145,6 +175,7 @@ export default function App() {
     updateMap((m) => ({ ...m, nodes: m.nodes.map((n) => (n.id === id ? { ...n, ...patch } : n)) })), [updateMap])
 
   const addNode = useCallback((pos, fromId) => {
+    if (!editRef.current) return
     const id = uid()
     updateMap((m) => {
       const from = fromId && m.nodes.find((n) => n.id === fromId)
@@ -176,6 +207,7 @@ export default function App() {
 
   // Deleting the centre box of a sub-map deletes the whole sub-map and returns to the box that owned it.
   const deleteCurrentMap = useCallback(async () => {
+    if (!editRef.current) return
     if (!window.confirm('Delete this map and everything inside it?')) return
     const { topic: t, mapId: cur, chain: c } = locRef.current
     const parentId = c[c.length - 2]?.id || 'root'
@@ -195,6 +227,7 @@ export default function App() {
   }, [fail])
 
   const removeNodes = useCallback((ids) => {
+    if (!editRef.current) return
     const m = mapRef.current
     if (ids.includes(m.center) && locRef.current.mapId !== 'root') { deleteCurrentMap(); return }
     // The centre box anchors the map and stays.
@@ -223,6 +256,7 @@ export default function App() {
 
   // A link between a box of an outer map and a box inside one of its sub-maps is stored in the outer map.
   const addCrossLink = useCallback(async (storeId, { outer, inner, via, title }) => {
+    if (!editRef.current) return
     const link = { id: uid(), a: outer, b: inner, via, ...(title ? { bt: title } : {}) }
     const dup = (l) => l.via === via && l.a === outer && l.b === inner
     if (storeId === locRef.current.mapId) {
@@ -308,7 +342,7 @@ export default function App() {
   }
 
   useKeyboardShortcuts({
-    mapRef, selection, selectedId, selectedLink,
+    mapRef, selection: playing ? [] : selection, selectedId: playing ? null : selectedId, selectedLink,
     setSelection, setSelectedLink, setEditingId, setEditingLink,
     updateMap, addLinkedNode, removeNodes, removeLink,
   })
@@ -336,6 +370,10 @@ export default function App() {
         onRename={renameTopic}
         onDelete={deleteTopic}
         onJump={jumpTo}
+        authed={authed}
+        openTopics={openTopics}
+        onToggleLock={toggleLock}
+        onUnlock={unlock}
       />
       <main className="stage">
         {map && loadedKey === `${topic}:${mapId}` ? (
@@ -355,6 +393,8 @@ export default function App() {
             editingLink={editingLink}
             setEditingLink={setEditingLink}
             status={status}
+            editable={editable}
+            onPlaying={setPlaying}
             ops={{ updateMap, addNode, addLinkedNode, removeNodes, addLink, addCrossLink, openSubmap, commitTitle, commitLabel }}
           />
         ) : (
@@ -378,6 +418,7 @@ export default function App() {
           onPatch={(patch) => patchNode(selected.id, patch)}
           onClose={() => setSelection([])}
           onError={fail}
+          readOnly={!editable || playing}
         />
       )}
       {pickedLink && (
@@ -389,6 +430,7 @@ export default function App() {
           onPatch={(patch) => patchLink(pickedLink.id, patch)}
           onRemove={() => removeLink(pickedLink.id)}
           onClose={() => setSelectedLink(null)}
+          readOnly={!editable}
         />
       )}
     </div>
