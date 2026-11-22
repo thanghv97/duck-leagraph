@@ -13,24 +13,24 @@
     {
       "id": "e7iy1q3k",
       "title": "Issue",
-      "x": -2498,
-      "y": -1384,
+      "x": -2364,
+      "y": -1501,
       "color": "#a1396b",
       "desc": "Làm sao để producer có thể biết được bản tin đã được gửi lên broker hay chưa ?"
     },
     {
       "id": "67fao5sh",
       "title": "Acknowledgments (ACK)",
-      "x": -2076,
-      "y": -1237,
+      "x": -1850,
+      "y": -1244,
       "color": "#3f8f4a",
       "bookmark": true
     },
     {
       "id": "tn9g85sz",
       "title": "ACK Strategies",
-      "x": -1576,
-      "y": -1353,
+      "x": -1266,
+      "y": -1290,
       "color": "#d99a1c",
       "desc": "Trade-off giữa reliability và performance\n+ acks = all or acks = - 1\n+ acks = 0\n+ acks = 1",
       "note": true
@@ -38,8 +38,8 @@
     {
       "id": "ofonkurj",
       "title": "ppt: acks = all (acks = -1)",
-      "x": -1232,
-      "y": -1615,
+      "x": -811,
+      "y": -1644,
       "color": "#0a7d8c",
       "desc": "(default - Kafka >= 3.0) \nProducer sẽ nhận được repsonse sau khi toàn bộ min.insync.replica được replicated data (OS Page)",
       "note": false
@@ -47,48 +47,48 @@
     {
       "id": "te56i4pr",
       "title": "ppt: acks = 1",
-      "x": -904,
-      "y": -1424,
+      "x": -557,
+      "y": -1363,
       "color": "#0a7d8c",
       "desc": "Producer sẽ nhận được repsonse sau khi dữ liệu được ghi nhận vào node leader (OS Page)"
     },
     {
       "id": "t8qaz1pa",
       "title": "ppt: acks = 0",
-      "x": -870,
-      "y": -1149,
+      "x": -414,
+      "y": -1084,
       "color": "#0a7d8c",
       "desc": "Producer sẽ nhận được repsonse lập tức mà không cần confirm gì cả"
     },
     {
       "id": "4i9l1j5v",
       "title": "Issue",
-      "x": -623,
-      "y": -1755,
+      "x": -163,
+      "y": -1772,
       "color": "#a1396b",
       "desc": "Nếu 2/3 ISR lỗi và min.insync.replica = 2, chuyện gi sẽ xảy ra ?"
     },
     {
       "id": "f0jc44v4",
       "title": "ppt: min.insync.replicas",
-      "x": -1794,
-      "y": -1735,
+      "x": -1484,
+      "y": -1672,
       "color": "#0a7d8c",
       "desc": "(default: 1) \nSố lượng bản sao (replica) tối thiểu phải nằm trong ISR cần xác nhận đã nhận được data thì việc ghi mới được coi là thành công (dành cho ack = all or -1)"
     },
     {
       "id": "5wghs1mz",
       "title": "Issue",
-      "x": -1228,
-      "y": -1963,
+      "x": -1045,
+      "y": -2125,
       "color": "#a1396b",
       "desc": "min.insync.replicas (default) or min.insync.replicas = 1 và ISR = 1 \n=> hành vi của acks = all sẽ tương tự với acks = 1"
     },
     {
       "id": "mkbm6fuq",
       "title": "Issue",
-      "x": -2328,
-      "y": -1016,
+      "x": -2133,
+      "y": -834,
       "color": "#a1396b",
       "desc": "Chuyện gì xảy ra khi request đã ghi nhận broker thành công nhưng bản tin ACK lại không trả về đến producer (do network, ...) ? \n=> producer retry và lặp lại bản tin lần nữa ?",
       "note": true
@@ -96,8 +96,8 @@
     {
       "id": "ph6wos5f",
       "title": "Idempotence",
-      "x": -1900,
-      "y": -808,
+      "x": -1467,
+      "y": -644,
       "color": "#3f8f4a",
       "desc": "Producer sẽ assign 1 sequence ID cho mỗi message, ngoài ra các thuộc tính khác cũng được yêu cầu để đảm bảo tính Idempotence",
       "note": true,
@@ -106,8 +106,8 @@
     {
       "id": "k2dxjw6b",
       "title": "ppt: enable.idempotence",
-      "x": -1416,
-      "y": -871,
+      "x": -1106,
+      "y": -808,
       "color": "#0a7d8c",
       "desc": "(default: true - Kafka >= 3.3) ",
       "note": true
@@ -115,8 +115,8 @@
     {
       "id": "ovtmnjg4",
       "title": "ppt: max.in.flight.requests.per.connection",
-      "x": -685,
-      "y": -960,
+      "x": -387,
+      "y": -862,
       "color": "#0a7d8c",
       "desc": "(default: 5)\nCho phép producer gửi gối đầu số lượng request liên tục trên 1 TCP conenction mà chưa nhận được ACK",
       "note": true
@@ -124,24 +124,24 @@
     {
       "id": "1hws7260",
       "title": "ppt: retries",
-      "x": -933,
-      "y": -668,
+      "x": -644,
+      "y": -530,
       "color": "#0a7d8c",
       "desc": "(default: MAX_INTEGER = 2147483647 - Kafka >= 2.1)\nSố lần max mà producer gửi lại request nếu ack fail"
     },
     {
       "id": "i6d6s3ad",
       "title": "ppt: delivery.timeout.ms",
-      "x": -478,
-      "y": -749,
+      "x": -180,
+      "y": -620,
       "color": "#0a7d8c",
       "desc": "(default: 120.000ms = 2 min)\nThời gian timeout tính từ thời điểm send() cho đến khi nhận được ACK "
     },
     {
       "id": "yvwbnrh2",
       "title": "Issue",
-      "x": 18,
-      "y": -1006,
+      "x": 267,
+      "y": -875,
       "color": "#a1396b",
       "desc": "Nếu 5 message gửi tại các thời điểm khác nhau khi vào hàm send(), sau đó được đóng vào 1 batch \n=> delivery.timeout.ms sẽ được tính như thế nào nếu batch đó bị gửi fail liên tục ",
       "note": true
@@ -149,16 +149,16 @@
     {
       "id": "yelo2bne",
       "title": "ppt: retry.backoff.ms",
-      "x": -500,
-      "y": -492,
+      "x": -204,
+      "y": -309,
       "color": "#0a7d8c",
       "desc": "(default: 100ms) \nKhoảng thời gian Producer tạm nghỉ giữa các lần retry liên tiếp"
     },
     {
       "id": "5duh61au",
       "title": "Issue",
-      "x": -1638,
-      "y": -545,
+      "x": -993,
+      "y": -309,
       "color": "#a1396b",
       "desc": "Chuyện gì xảy ra khi message đến sai thứ tự, B đến trước A, A mãi mãi bị pending gửi lỗi?",
       "note": true
@@ -166,8 +166,8 @@
     {
       "id": "3tygy8i6",
       "title": "Issue",
-      "x": -2409,
-      "y": -524,
+      "x": -3118,
+      "y": -479,
       "color": "#a1396b",
       "desc": "Khi thực hiện produce, làm sao để đảm bảo tính atomic cho multiple topic (vd topic A, __consumer_offset)",
       "note": true
@@ -175,8 +175,8 @@
     {
       "id": "cf2u39o8",
       "title": "Transaction Strategies",
-      "x": -2342,
-      "y": -142,
+      "x": -3423,
+      "y": 214,
       "color": "#d99a1c",
       "desc": "Trade-off giữa performance và complexity\n+ Transaction (use Kafka transactions)\n+ No Transaction (self-implemented)",
       "note": true
@@ -184,10 +184,52 @@
     {
       "id": "o7n3cf4l",
       "title": "ppt: enable.auto.commit",
-      "x": -1758,
-      "y": 46,
+      "x": -3197,
+      "y": 926,
       "color": "#0a7d8c",
       "desc": "(default: true) "
+    },
+    {
+      "id": "cgho4hxp",
+      "title": "Mechanism",
+      "x": -2501,
+      "y": -539,
+      "color": "#c8443f"
+    },
+    {
+      "id": "2lr7y1rh",
+      "title": "Batching",
+      "x": -1814,
+      "y": -243,
+      "color": "#c8443f"
+    },
+    {
+      "id": "vuxjocxc",
+      "title": "Partitioner",
+      "x": -2737,
+      "y": -208,
+      "color": "#c8443f"
+    },
+    {
+      "id": "f19ij30z",
+      "title": "Compression",
+      "x": -2263,
+      "y": 37,
+      "color": "#c8443f"
+    },
+    {
+      "id": "76zj0jrm",
+      "title": "ppt: batch.size",
+      "x": -1353,
+      "y": -133,
+      "color": "#0a7d8c"
+    },
+    {
+      "id": "b5vk46rl",
+      "title": "ppt: linger.ms",
+      "x": -1680,
+      "y": 142,
+      "color": "#0a7d8c"
     }
   ],
   "links": [
@@ -342,6 +384,36 @@
       "b": "o7n3cf4l",
       "dir": "a2b",
       "label": "set enable.auto.commit = false khi sử dụng Transaction"
+    },
+    {
+      "id": "39hhny5k",
+      "a": "nan0pxj3",
+      "b": "cgho4hxp"
+    },
+    {
+      "id": "ghy5jcdt",
+      "a": "cgho4hxp",
+      "b": "2lr7y1rh"
+    },
+    {
+      "id": "o5vlsq6k",
+      "a": "cgho4hxp",
+      "b": "vuxjocxc"
+    },
+    {
+      "id": "cyp6ch16",
+      "a": "cgho4hxp",
+      "b": "f19ij30z"
+    },
+    {
+      "id": "l1w6w2dq",
+      "a": "2lr7y1rh",
+      "b": "76zj0jrm"
+    },
+    {
+      "id": "01e6rs6q",
+      "a": "2lr7y1rh",
+      "b": "b5vk46rl"
     }
   ],
   "parentMap": "root"

@@ -13,8 +13,8 @@
     {
       "id": "cons",
       "title": "Three components",
-      "x": -2264,
-      "y": -932,
+      "x": -2255,
+      "y": -934,
       "color": "#1b2330",
       "filled": false,
       "tags": [],
@@ -26,41 +26,28 @@
       "x": -2800,
       "y": -517,
       "color": "#c8443f",
-      "sub": true
+      "sub": true,
+      "bookmark": true
     },
     {
       "id": "offset",
       "title": "coordination cluster",
-      "x": -3077,
-      "y": -728,
+      "x": -3273,
+      "y": -1145,
       "color": "#c8443f"
     },
     {
       "id": "jnt021cx",
       "title": "Clients",
-      "x": -1788,
-      "y": -702,
-      "color": "#c8443f"
-    },
-    {
-      "id": "jq2yxh99",
-      "title": "message",
-      "x": -3088,
-      "y": -44,
-      "color": "#c8443f"
-    },
-    {
-      "id": "5tzihnh8",
-      "title": "topic",
-      "x": -3348,
-      "y": -414,
+      "x": -1760,
+      "y": -555,
       "color": "#c8443f"
     },
     {
       "id": "51acnfvf",
       "title": "Reliability",
-      "x": -1373,
-      "y": -1294,
+      "x": -1478,
+      "y": -1289,
       "color": "#3f8f4a",
       "note": true
     },
@@ -86,19 +73,10 @@
       "color": "#d99a1c"
     },
     {
-      "id": "7gdwau0f",
-      "title": "Issue",
-      "x": -1734,
-      "y": -1533,
-      "color": "#a1396b",
-      "filled": false,
-      "desc": " Chuyện gì xảy ra nếu 1 trong các node broker đột ngột dừng hoạt động?\n"
-    },
-    {
       "id": "6apxvfgi",
       "title": "Consumers",
-      "x": -2008,
-      "y": -410,
+      "x": -2051,
+      "y": -179,
       "color": "#c8443f",
       "sub": true,
       "bookmark": true
@@ -106,32 +84,25 @@
     {
       "id": "icw9zi79",
       "title": "Producers",
-      "x": -1578,
-      "y": -304,
+      "x": -672,
+      "y": 104,
       "color": "#c8443f",
       "sub": true,
       "bookmark": true
     },
     {
-      "id": "kxnuv4mr",
-      "title": "__consumer_offet",
-      "x": -3775,
-      "y": -33,
-      "color": "#c8443f"
-    },
-    {
       "id": "fv6yb81f",
       "title": "Use Case",
-      "x": -1834,
-      "y": -44,
+      "x": -1502,
+      "y": 354,
       "color": "#d4651f",
       "desc": "Pattern Consume-Transform-Produce"
     },
     {
       "id": "kcbqksmh",
       "title": "Transaction",
-      "x": -2545,
-      "y": 796,
+      "x": -2852,
+      "y": 615,
       "color": "#3f8f4a",
       "desc": "Transaction trong Kafka cho phép ghi atomic đến 2 hoặc nhiều partition. Tất cả message thành công hoặc không"
     }
@@ -162,16 +133,6 @@
       "dir": "a2b"
     },
     {
-      "id": "v2twajyu",
-      "a": "group",
-      "b": "jq2yxh99"
-    },
-    {
-      "id": "l2i4winh",
-      "a": "group",
-      "b": "5tzihnh8"
-    },
-    {
       "id": "pjce6vjc",
       "a": "51acnfvf",
       "b": "9xzeaqs4"
@@ -192,16 +153,6 @@
       "b": "51acnfvf"
     },
     {
-      "id": "hlfmb3u9",
-      "a": "kafka",
-      "b": "7gdwau0f"
-    },
-    {
-      "id": "9dxts8o2",
-      "a": "7gdwau0f",
-      "b": "51acnfvf"
-    },
-    {
       "id": "3cklv78o",
       "a": "jnt021cx",
       "b": "6apxvfgi",
@@ -212,11 +163,6 @@
       "a": "jnt021cx",
       "b": "icw9zi79",
       "dir": "a2b"
-    },
-    {
-      "id": "p5gvdwnf",
-      "a": "5tzihnh8",
-      "b": "kxnuv4mr"
     },
     {
       "id": "ejt8kamp",
@@ -266,6 +212,13 @@
       "via": "icw9zi79",
       "bt": "Transaction Strategies",
       "dir": "b2a"
+    },
+    {
+      "id": "cgc7cdu3",
+      "a": "kcbqksmh",
+      "b": "t9kgfemd",
+      "via": "group",
+      "bt": "Two-Phase-Commit Protocol"
     }
   ],
   "center": "kafka"

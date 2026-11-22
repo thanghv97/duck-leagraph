@@ -426,7 +426,7 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
     return { ...n, className: lit ? `play-lit ${n.id === play.id ? 'play-cur' : ''}` : 'play-dim' }
   }) : nodes), [nodes, litIds, play])
   const viewEdges = useMemo(() => (litIds ? edges.map((e) => {
-    const lit = !e.data.ghost && play.open && (e.source === play.id || e.target === play.id) && litIds.has(e.source) && litIds.has(e.target)
+    const lit = !e.data.ghost && litIds.has(e.source) && litIds.has(e.target)
     return { ...e, className: lit ? 'play-lit' : 'play-dim', data: { ...e.data, playLit: lit, playing: true } }
   }) : edges), [edges, litIds, play])
 

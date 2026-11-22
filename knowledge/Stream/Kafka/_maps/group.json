@@ -13,10 +13,87 @@
     {
       "id": "xxlnfmn7",
       "title": "Replication",
-      "x": 402,
-      "y": 310,
+      "x": -341,
+      "y": 240,
       "color": "#3f8f4a",
       "desc": "\n"
+    },
+    {
+      "id": "t9kgfemd",
+      "title": "Two-Phase-Commit Protocol",
+      "x": -552,
+      "y": 1202,
+      "color": "#d99a1c"
+    },
+    {
+      "id": "e0os28wh",
+      "title": "Topic",
+      "x": -548,
+      "y": -32,
+      "color": "#3f8f4a"
+    },
+    {
+      "id": "32syeryp",
+      "title": "Message",
+      "x": -962,
+      "y": -191,
+      "color": "#3f8f4a"
+    },
+    {
+      "id": "nb92f3mj",
+      "title": "__consumer_offset",
+      "x": -1223,
+      "y": 73,
+      "color": "#3f8f4a"
+    },
+    {
+      "id": "c7glbkq2",
+      "title": "Leader-follower principle",
+      "x": -852,
+      "y": 262,
+      "color": "#d99a1c"
+    },
+    {
+      "id": "xgnv8wq8",
+      "title": "Leader",
+      "x": -1052,
+      "y": 431,
+      "color": "#d99a1c"
+    },
+    {
+      "id": "z075kqkj",
+      "title": "Follower",
+      "x": -647,
+      "y": 495,
+      "color": "#d99a1c"
+    },
+    {
+      "id": "kjt80owr",
+      "title": "Preferred Leader",
+      "x": -1499,
+      "y": 378,
+      "color": "#d99a1c"
+    },
+    {
+      "id": "19y6jgvh",
+      "title": "Unclean Leader",
+      "x": -1509,
+      "y": 582,
+      "color": "#d99a1c"
+    },
+    {
+      "id": "6pn4f951",
+      "title": "In-Sync Replicas (ISR)",
+      "x": -302,
+      "y": 453,
+      "color": "#d99a1c"
+    },
+    {
+      "id": "02mveusz",
+      "title": "Eligible Leader Replicas (ELR)",
+      "x": -1169,
+      "y": 768,
+      "color": "#3f8f4a"
     }
   ],
   "links": [
@@ -24,6 +101,68 @@
       "id": "dkaq64fq",
       "a": "j72hltoa",
       "b": "xxlnfmn7"
+    },
+    {
+      "id": "507f258l",
+      "a": "j72hltoa",
+      "b": "e0os28wh"
+    },
+    {
+      "id": "wg9qei3y",
+      "a": "e0os28wh",
+      "b": "nb92f3mj"
+    },
+    {
+      "id": "p22pbzb7",
+      "a": "e0os28wh",
+      "b": "32syeryp"
+    },
+    {
+      "id": "zfhvl7px",
+      "a": "xxlnfmn7",
+      "b": "c7glbkq2"
+    },
+    {
+      "id": "n9itwz6v",
+      "a": "c7glbkq2",
+      "b": "xgnv8wq8"
+    },
+    {
+      "id": "vn33e5oc",
+      "a": "c7glbkq2",
+      "b": "z075kqkj"
+    },
+    {
+      "id": "q3s6tuxo",
+      "a": "xgnv8wq8",
+      "b": "kjt80owr"
+    },
+    {
+      "id": "x44rr2aj",
+      "a": "xgnv8wq8",
+      "b": "19y6jgvh"
+    },
+    {
+      "id": "zv8y9rm2",
+      "a": "z075kqkj",
+      "b": "xgnv8wq8",
+      "dir": "a2b",
+      "label": "fetch data"
+    },
+    {
+      "id": "8dtzoc56",
+      "a": "xxlnfmn7",
+      "b": "6pn4f951"
+    },
+    {
+      "id": "a9f3letz",
+      "a": "xgnv8wq8",
+      "b": "02mveusz"
+    },
+    {
+      "id": "bxtbzymq",
+      "a": "02mveusz",
+      "b": "6pn4f951"
     }
   ],
   "parentMap": "root"
