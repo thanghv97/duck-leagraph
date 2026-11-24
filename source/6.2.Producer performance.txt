@@ -1,0 +1,112 @@
+6.2 Producer performance
+Now that we know how to optimize performance for our topics, we can move on to take a closer look at our route from producer to broker to consumer. Because the producer is the point where messages are produced into the Kafka cluster, we can have a big effect on the performance and resource utilization of the overall system here.
+
+6.2.1 Producer configuration
+To produce messages, producers usually use either the Java Kafka library or, if another programming language is used, a library based on librdkafka. The program code typically passes only the message with a value and an optional key. The library then decides into which partition this message should be produced. It’s also possible to implement custom partitioning algorithms, but this should be avoided in general. Letting the producer decide into which partition to produce a message might seem counterintuitive, but this ensures less coordination overhead on the brokers and thus higher performance. This approach gives producers the flexibility to implement their own partitioning algorithms for the rare cases where this is needed.
+
+Kafka improves data throughput through batching, that is, grouping multiple messages into a batch before sending them to a broker. Larger batches mean fewer network requests and better efficiency. Batching can be configured independently on each producer using two settings: batch.size and linger.ms. The batch.size setting specifies the maximum size of a batch, with a default value of 16 KB (16,384 bytes). The linger.ms setting specifies how long the producer should wait for additional messages before sending a batch. By default, this is set to 0, meaning the producer will send messages as quickly as possible.
+
+Even with the default setting of 0, batching often occurs because messages aren’t always sent as quickly as they are produced. This allows us to benefit from batching naturally when multiple messages fit into a batch. For scenarios where immediate delivery is less critical, we can increase throughput by setting a larger batch.size and a higher linger.ms value. Note that batch.size is measured in bytes, and linger.ms is in milliseconds. Figure 6.5 illustrates the batching process.
+
+We believe the default batch.size in Kafka, set at 16 KB, is too small for most use cases. Increasing the batch size can significantly enhance the efficiency of data pro­cessing and storage, as larger batches reduce the overhead associated with indi­vidual message handling. The maximum permissible batch.size is determined by max.message.bytes, allowing for tuning up to 1 MB by default. Similarly, the default linger.ms is often set too low at 0 ms. Setting linger.ms to approximately 10 ms typically improves both throughput and latency, especially for producers sending more than 100 messages per second.
+
+For lower message rates, linger.ms can be increased further, though this might degrade latency. Generally, linger.ms adjustments are less critical unless dealing with a high-throughput cluster. However, increasing batch.size can drastically enhance performance and reduce cluster load by minimizing the number of network messages that need processing.
+
+A group of colorful squares  AI-generated content may be incorrect.
+Figure 6.5 The producer batches messages for each topic and partition. A message is sent as soon as either the batch is full or the linger time is up.
+TIP For most use cases, we recommend setting batch.size to up to 1MB and linger.ms to around 10ms. Always monitor your system’s performance metrics after adjusting these settings to ensure optimal configuration for your specific workload.
+
+We’ve already dealt with acknowledgments (ACKs) in chapter 5 and saw that we can use ACKs to control how reliable or performant messages are delivered from the producer to Kafka. We can improve performance at the expense of reliability with ACK values of 1 or even 0, but the ACK value mostly depends on our reliability requirements and not on our performance requirements.
+
+Instead, there’s another set screw by means of compression, which can not only significantly improve the performance of our Kafka environment but also reduce its resource requirements. We can use the compression.type setting to influence the type of compression. By default, compression is turned off, but Kafka supports some algorithms, so we can choose between none, gzip, snappy, lz4, or zstd.
+
+Depending on the requirements, such as compression ratio, compression time, and decompression time, one algorithm may be better suited than the others. Usually, zstd or lz4 provide the best balance between throughput and CPU overhead. Instead of compressing individual messages, Kafka compresses whole batches along the entire route from producer to consumer. This is possible because a producer uses a separate batch for sending messages for each partition; that is, all messages for one partition are grouped in one batch, and messages for another partition are collected in a separate batch.
+
+Even better, more active batching usually leads to improved compression. The producer compresses the entire batch once and sends the compressed batch to the leader. The leader stores it unchanged on the local hard disk and transmits this compressed batch unchanged to the followers. Only when the consumer receives the batch is it unpacked and split into individual messages, as shown in figure 6.6. This approach ensures that compression not only provides a one-time reduction in size but also decreases network load at multiple points and minimizes the hard disk space required for storage.
+
+
+Figure 6.6 When we turn on compression, the producer compresses entire batches. Not only do we send these compressed batches over the network, but they are also stored on the brokers in compressed form. Only the consumer has to finally unpack the batch to extract the individual messages.
+It’s important to note how Kafka handles offsets within compressed batches. When a consumer needs to start at an offset within a compressed batch, it will receive the entire batch, decompress it, and begin processing from the correct message within that batch. This design aligns with Kafka’s philosophy of treating data as immutable logs and avoiding the need for the broker to parse or modify message contents.
+
+Additionally, if some producers write compressed messages and others don’t for the same topic, Kafka handles this gracefully. Each producer specifies its own compression settings, and Kafka doesn’t enforce uniform compression across producers. Therefore, one producer can send compressed batches while another sends uncompressed messages, and both can coexist within the same partition. However, note that mixed compression configurations may lead to inconsistencies in throughput and storage efficiency, as compressed batches consume less space and reduce network overhead compared to uncompressed ones. For optimal performance, it’s generally recommended to standardize compression settings across producers for a given topic.
+
+6.2.2 Producer performance test
+The best way to test the performance of our producer is to use the Kafka-provided tool called kafka-producer-perf-test.sh. We can use this tool to test different configuration settings and message types for performance effect. Always keep in mind when doing these tests that this isn’t a substitute for performance testing with real producers. For such end-to-end performance tests, tools such as Apache JMeter (https://jmeter.apache.org/) are better suited.
+
+WARNING The kafka-producer-perf-test.sh tool will, depending on its configuration, produce many messages and therefore create multiple gigabytes of data on your disk.
+
+The easiest way to start kafka-producer-perf-test.sh is with the following command. For this, we assume that we’ve already created a topic performance-test.
+
+$ kafka-producer-perf-test.sh \
+    --topic performance-test \
+    --num-records 1000000 \
+    --record-size 10000 \
+    --throughput -1 \
+    --producer-props bootstrap.servers=localhost:9092
+Here, we produce 1,000,000 messages (--num-records), each 10,000 bytes in size (--record-size), without limiting throughput (--throughput -1)—so as fast as possible. We produce the data into the topic performance-test (--topic). We have to set the bootstrap server via the --producer-props flag. After running this command, we get an evaluation that looks similar to the following:
+
+39481 records sent, 7896.2 records/sec (75.30 MB/sec),
+238.1 ms avg latency, 399.0 ms max latency.
+62616 records sent, 12523.2 records/sec (119.43 MB/sec),
+164.1 ms avg latency, 253.0 ms max latency.
+[...]
+1000000 records sent, 12317.546345 records/sec (117.47 MB/sec),
+165.43 msavg latency, 399.00 ms max latency, 157 ms 50th,
+211 ms 95th, 287 ms 99th, 353 ms 99.9th.
+Let’s take a closer look at the output. The command gives us the current statistics every few seconds. It’s not uncommon for kafka-producer-perf-test.sh to start slower at the beginning and for the throughput and latency to improve after a few outputs. This behavior is often attributed to the Java Virtual Machine (JVM) warming up, meaning that the JVM gradually optimizes the code execution and needs some time to allocate buffers and other objects at the beginning.
+
+In our example, after the desired number of messages are produced, we can look at the results. We see that Kafka sent approximately 12,317 messages per second at a total throughput of 117.47 MB/s. Our average latency was 165 ms.
+
+If we run the performance test only once, we should be careful about interpreting too much into the result. To run performance tests correctly, we need to run several repetitions and then evaluate them. But it gives us a first clue regarding how we could further improve the performance.
+
+For example, we know that increasing the size of the batches and simultaneously increasing the linger time leads to improved throughput. We set this with the --producer-props flag. Let’s give it a try:
+
+$ kafka-producer-perf-test.sh \
+    --topic performance-test \
+    --num-records 1000000 \
+    --record-size 10000 \
+    --throughput -1 \
+    --producer-props bootstrap.servers=localhost:9092 \
+                     batch.size=100000 linger.ms=100
+...
+1000000 records sent, 45879.977978 records/sec (437.55 MB/sec),
+64.61 ms avg latency, 279.00 ms max latency, 58 ms 50th,
+101 ms 95th, 126 ms 99th, 178 ms 99.9th.
+We can see here that instead of about 117 MB/s as at first, we achieve a whole 437.55 MB/s data throughput. Interestingly, even the latency drops from the original 165 ms to 65 ms. The reason for the improvement in latency here is that the batch size was probably chosen too small for the use case. We remember that the batch size is set to 16 KB by default. So if we generate messages of about 10 KB each, we don’t use batching at all, and the messages pile up. This leads to degraded latency.
+
+This example should make it clear once again that it’s essential to test the performance in your own cluster with the given use cases. Table 6.1 provides information on what should be considered when tuning the performance of a producer, but it can’t replace a real performance test, using production-like data under conditions similar to those in a live environment. Every use case is different, and the settings should always be chosen carefully.
+
+Table 6.1 Producer settings
+Configuration Setting
+
+Description
+
+acks
+
+0: Higher throughput, data loss possible
+
+1: Slightly lower throughput, data loss less likely
+
+-1/all: Even slightly lower throughput, higher reliability
+
+enable.idempotence
+
+false: Not recommended
+
+true: Guarantees the order and uniqueness of messages and only compatible with acks=-1
+
+compression.type
+
+none: No compression
+
+gzip: Better compression, more CPU load
+
+zstd, snappy, lz4: Can be more performant than gzip
+
+batch.size
+
+Batch size in bytes: In general, the higher the batch size, the higher the latency and throughput. Don’t be afraid of setting batch.size to big numbers (maximum 1 MB).
+
+linger.ms
+
+Time that is waited to fill a batch: In general, larger values lead to higher latency but also higher data throughput.

@@ -5,109 +5,98 @@
     {
       "id": "nan0pxj3",
       "title": "producers",
-      "x": -2758,
-      "y": -1040,
+      "x": -2742,
+      "y": -1025,
       "color": "#1b2330",
       "filled": true
     },
     {
       "id": "e7iy1q3k",
-      "title": "Issue",
-      "x": -2364,
-      "y": -1501,
+      "title": "Question",
+      "x": -1464,
+      "y": -1091,
       "color": "#a1396b",
-      "desc": "Làm sao để producer có thể biết được bản tin đã được gửi lên broker hay chưa ?"
+      "desc": "Làm sao để producer có thể biết được bản tin đã được gửi lên broker hay chưa ?",
+      "hidden": true
     },
     {
       "id": "67fao5sh",
       "title": "Acknowledgments (ACK)",
-      "x": -1850,
-      "y": -1244,
+      "x": -1207,
+      "y": -1503,
       "color": "#3f8f4a",
-      "bookmark": true
+      "bookmark": true,
+      "filled": true
     },
     {
       "id": "tn9g85sz",
       "title": "ACK Strategies",
-      "x": -1266,
-      "y": -1290,
+      "x": -622,
+      "y": -1757,
       "color": "#d99a1c",
       "desc": "Trade-off giữa reliability và performance\n+ acks = all or acks = - 1\n+ acks = 0\n+ acks = 1",
       "note": true
     },
     {
       "id": "ofonkurj",
-      "title": "ppt: acks = all (acks = -1)",
-      "x": -811,
-      "y": -1644,
+      "title": "ppt: acks",
+      "x": -154,
+      "y": -2088,
       "color": "#0a7d8c",
-      "desc": "(default - Kafka >= 3.0) \nProducer sẽ nhận được repsonse sau khi toàn bộ min.insync.replica được replicated data (OS Page)",
+      "desc": "(default: acks = all - Kafka >= 3.0) \n",
       "note": false
     },
     {
-      "id": "te56i4pr",
-      "title": "ppt: acks = 1",
-      "x": -557,
-      "y": -1363,
-      "color": "#0a7d8c",
-      "desc": "Producer sẽ nhận được repsonse sau khi dữ liệu được ghi nhận vào node leader (OS Page)"
-    },
-    {
-      "id": "t8qaz1pa",
-      "title": "ppt: acks = 0",
-      "x": -414,
-      "y": -1084,
-      "color": "#0a7d8c",
-      "desc": "Producer sẽ nhận được repsonse lập tức mà không cần confirm gì cả"
-    },
-    {
       "id": "4i9l1j5v",
-      "title": "Issue",
-      "x": -163,
-      "y": -1772,
+      "title": "Question",
+      "x": -387,
+      "y": -2507,
       "color": "#a1396b",
-      "desc": "Nếu 2/3 ISR lỗi và min.insync.replica = 2, chuyện gi sẽ xảy ra ?"
+      "desc": "Nếu 2/3 ISR lỗi và min.insync.replica = 2, chuyện gi sẽ xảy ra ?",
+      "note": true
     },
     {
       "id": "f0jc44v4",
       "title": "ppt: min.insync.replicas",
-      "x": -1484,
-      "y": -1672,
+      "x": 466,
+      "y": -2157,
       "color": "#0a7d8c",
       "desc": "(default: 1) \nSố lượng bản sao (replica) tối thiểu phải nằm trong ISR cần xác nhận đã nhận được data thì việc ghi mới được coi là thành công (dành cho ack = all or -1)"
     },
     {
       "id": "5wghs1mz",
-      "title": "Issue",
-      "x": -1045,
-      "y": -2125,
-      "color": "#a1396b",
+      "title": "Note",
+      "x": 194,
+      "y": -2493,
+      "color": "#d99a1c",
       "desc": "min.insync.replicas (default) or min.insync.replicas = 1 và ISR = 1 \n=> hành vi của acks = all sẽ tương tự với acks = 1"
     },
     {
       "id": "mkbm6fuq",
-      "title": "Issue",
-      "x": -2133,
-      "y": -834,
+      "title": "Question",
+      "x": -1189,
+      "y": -1882,
       "color": "#a1396b",
-      "desc": "Chuyện gì xảy ra khi request đã ghi nhận broker thành công nhưng bản tin ACK lại không trả về đến producer (do network, ...) ? \n=> producer retry và lặp lại bản tin lần nữa ?",
-      "note": true
+      "desc": "Chuyện gì xảy ra khi request đã ghi nhận broker thành công nhưng bản tin ACK lại không trả về đến producer (do network, ...) ? \nLiệu producer retry và lặp lại bản tin lần nữa không ?",
+      "note": true,
+      "hidden": true
     },
     {
       "id": "ph6wos5f",
       "title": "Idempotence",
-      "x": -1467,
-      "y": -644,
+      "x": -538,
+      "y": -867,
       "color": "#3f8f4a",
-      "desc": "Producer sẽ assign 1 sequence ID cho mỗi message, ngoài ra các thuộc tính khác cũng được yêu cầu để đảm bảo tính Idempotence",
+      "desc": "Producer sẽ assign 1 sequence ID cho mỗi message khi enable idempotence, ngoài ra các thuộc tính khác cũng được yêu cầu để đảm bảo tính Idempotence",
       "note": true,
-      "bookmark": true
+      "bookmark": false,
+      "filled": true
     },
     {
       "id": "k2dxjw6b",
       "title": "ppt: enable.idempotence",
-      "x": -1106,
-      "y": -808,
+      "x": 328,
+      "y": -1075,
       "color": "#0a7d8c",
       "desc": "(default: true - Kafka >= 3.3) ",
       "note": true
@@ -115,8 +104,8 @@
     {
       "id": "ovtmnjg4",
       "title": "ppt: max.in.flight.requests.per.connection",
-      "x": -387,
-      "y": -862,
+      "x": 1055,
+      "y": -1037,
       "color": "#0a7d8c",
       "desc": "(default: 5)\nCho phép producer gửi gối đầu số lượng request liên tục trên 1 TCP conenction mà chưa nhận được ACK",
       "note": true
@@ -124,24 +113,24 @@
     {
       "id": "1hws7260",
       "title": "ppt: retries",
-      "x": -644,
-      "y": -530,
+      "x": 898,
+      "y": -1601,
       "color": "#0a7d8c",
       "desc": "(default: MAX_INTEGER = 2147483647 - Kafka >= 2.1)\nSố lần max mà producer gửi lại request nếu ack fail"
     },
     {
       "id": "i6d6s3ad",
       "title": "ppt: delivery.timeout.ms",
-      "x": -180,
-      "y": -620,
+      "x": 1573,
+      "y": -2012,
       "color": "#0a7d8c",
       "desc": "(default: 120.000ms = 2 min)\nThời gian timeout tính từ thời điểm send() cho đến khi nhận được ACK "
     },
     {
       "id": "yvwbnrh2",
-      "title": "Issue",
-      "x": 267,
-      "y": -875,
+      "title": "Question",
+      "x": 2374,
+      "y": -2115,
       "color": "#a1396b",
       "desc": "Nếu 5 message gửi tại các thời điểm khác nhau khi vào hàm send(), sau đó được đóng vào 1 batch \n=> delivery.timeout.ms sẽ được tính như thế nào nếu batch đó bị gửi fail liên tục ",
       "note": true
@@ -149,34 +138,35 @@
     {
       "id": "yelo2bne",
       "title": "ppt: retry.backoff.ms",
-      "x": -204,
-      "y": -309,
+      "x": 1847,
+      "y": -1456,
       "color": "#0a7d8c",
       "desc": "(default: 100ms) \nKhoảng thời gian Producer tạm nghỉ giữa các lần retry liên tiếp"
     },
     {
       "id": "5duh61au",
-      "title": "Issue",
-      "x": -993,
-      "y": -309,
+      "title": "Question",
+      "x": -606,
+      "y": -1185,
       "color": "#a1396b",
-      "desc": "Chuyện gì xảy ra khi message đến sai thứ tự, B đến trước A, A mãi mãi bị pending gửi lỗi?",
+      "desc": "Chuyện gì xảy ra khi message đến sai thứ tự khi đã enable idempotence, B đến trước A và A mãi mãi bị pending gửi lỗi?",
       "note": true
     },
     {
       "id": "3tygy8i6",
-      "title": "Issue",
-      "x": -3118,
+      "title": "Question",
+      "x": -1970,
       "y": -479,
       "color": "#a1396b",
       "desc": "Khi thực hiện produce, làm sao để đảm bảo tính atomic cho multiple topic (vd topic A, __consumer_offset)",
-      "note": true
+      "note": true,
+      "hidden": true
     },
     {
       "id": "cf2u39o8",
       "title": "Transaction Strategies",
-      "x": -3423,
-      "y": 214,
+      "x": -2028,
+      "y": 614,
       "color": "#d99a1c",
       "desc": "Trade-off giữa performance và complexity\n+ Transaction (use Kafka transactions)\n+ No Transaction (self-implemented)",
       "note": true
@@ -184,67 +174,111 @@
     {
       "id": "o7n3cf4l",
       "title": "ppt: enable.auto.commit",
-      "x": -3197,
-      "y": 926,
+      "x": -1690,
+      "y": 1158,
       "color": "#0a7d8c",
       "desc": "(default: true) "
     },
     {
       "id": "cgho4hxp",
       "title": "Mechanism",
-      "x": -2501,
-      "y": -539,
-      "color": "#c8443f"
-    },
-    {
-      "id": "2lr7y1rh",
-      "title": "Batching",
-      "x": -1814,
-      "y": -243,
-      "color": "#c8443f"
+      "x": -1884,
+      "y": -1192,
+      "color": "#c8443f",
+      "note": true,
+      "filled": true
     },
     {
       "id": "vuxjocxc",
       "title": "Partitioner",
-      "x": -2737,
-      "y": -208,
-      "color": "#c8443f"
+      "x": -1653,
+      "y": -2089,
+      "color": "#3f8f4a",
+      "desc": "Partitioner quyết định xem một message sẽ được gửi vào Partition nào trong số các Partition của một Topic\n",
+      "filled": true,
+      "bookmark": true
     },
     {
       "id": "f19ij30z",
       "title": "Compression",
-      "x": -2263,
-      "y": 37,
-      "color": "#c8443f"
+      "x": -1202,
+      "y": 231,
+      "color": "#3f8f4a",
+      "desc": "Compression batch để thu nhỏ kích thước các gói tin (message batch) trước khi gửi qua mạng,  giúp tiết kiệm băng thông, giảm dung lượng lưu trữ trên ổ cứng và tăng thông lượng (throughput) của toàn hệ thống",
+      "note": true,
+      "filled": true
     },
     {
       "id": "76zj0jrm",
       "title": "ppt: batch.size",
-      "x": -1353,
-      "y": -133,
-      "color": "#0a7d8c"
+      "x": 272,
+      "y": -547,
+      "color": "#0a7d8c",
+      "desc": "(default: 16 KB = 16.384 bytes)\nKích thước tối đa của 1 batch (bytes). Giới hạn trên theo max.message.bytes (default 1 MB).\n"
     },
     {
       "id": "b5vk46rl",
       "title": "ppt: linger.ms",
-      "x": -1680,
-      "y": 142,
-      "color": "#0a7d8c"
+      "x": 103,
+      "y": 148,
+      "color": "#0a7d8c",
+      "desc": "(default: 0 ms)\nThời gian producer chờ thêm message để đầy batch trước khi gửi (ms). \n"
+    },
+    {
+      "id": "q7aoy9s6",
+      "title": "ppt: compression.type",
+      "x": -679,
+      "y": 616,
+      "color": "#0a7d8c",
+      "desc": "(default: none)\nOptions: none, gzip, snappy, lz4, zstd."
+    },
+    {
+      "id": "2lr7y1rh",
+      "title": "Batching",
+      "x": -529,
+      "y": -205,
+      "color": "#3f8f4a",
+      "note": true,
+      "desc": "Gom nhiều message thành 1 batch trước khi gửi lên broker ",
+      "filled": true
+    },
+    {
+      "id": "gjf1ie4m",
+      "title": "Produce",
+      "x": -1340,
+      "y": -537,
+      "color": "#3f8f4a",
+      "filled": true,
+      "bookmark": true
+    },
+    {
+      "id": "9o8qnusi",
+      "title": "Murmur",
+      "x": -1045,
+      "y": -2373,
+      "color": "#3f8f4a",
+      "filled": true
+    },
+    {
+      "id": "ic6pm1hn",
+      "title": "Question",
+      "x": -1023,
+      "y": -1031,
+      "color": "#a1396b",
+      "filled": false,
+      "desc": "Chuyện gì xảy ra khi message B được produce sau message A nhưng do lỗi network dẫn đến message A bị lỗi,  điều này có dẫn đến việc sai thứ tự message B nằm trước message A trên broker ko?",
+      "hidden": true
+    },
+    {
+      "id": "wqkdoa3z",
+      "title": "Transaction",
+      "x": -1945,
+      "y": 96,
+      "color": "#3f8f4a",
+      "filled": true
     }
   ],
   "links": [
-    {
-      "id": "g1ej07io",
-      "a": "e7iy1q3k",
-      "b": "67fao5sh",
-      "dir": "a2b"
-    },
-    {
-      "id": "9dbniqyw",
-      "a": "nan0pxj3",
-      "b": "e7iy1q3k",
-      "dir": "a2b"
-    },
     {
       "id": "srb78ih7",
       "a": "67fao5sh",
@@ -258,18 +292,6 @@
       "dir": "a2b"
     },
     {
-      "id": "pep9ve2p",
-      "a": "tn9g85sz",
-      "b": "te56i4pr",
-      "dir": "a2b"
-    },
-    {
-      "id": "85l73czk",
-      "a": "tn9g85sz",
-      "b": "t8qaz1pa",
-      "dir": "a2b"
-    },
-    {
       "id": "o2nmpwsu",
       "a": "f0jc44v4",
       "b": "ofonkurj"
@@ -278,21 +300,6 @@
       "id": "vvqm88cm",
       "a": "ofonkurj",
       "b": "4i9l1j5v",
-      "label": "Error: NOT_ENOUGH_REPLICAS",
-      "dir": "a2b"
-    },
-    {
-      "id": "pheuelzx",
-      "a": "te56i4pr",
-      "b": "4i9l1j5v",
-      "label": "Success",
-      "dir": "a2b"
-    },
-    {
-      "id": "v4rwaqmz",
-      "a": "t8qaz1pa",
-      "b": "4i9l1j5v",
-      "label": "Success",
       "dir": "a2b"
     },
     {
@@ -308,27 +315,10 @@
       "dir": "a2b"
     },
     {
-      "id": "2fkc2ac9",
-      "a": "nan0pxj3",
-      "b": "mkbm6fuq",
-      "dir": "a2b"
-    },
-    {
-      "id": "e2ouayon",
-      "a": "67fao5sh",
-      "b": "mkbm6fuq",
-      "dir": "a2b"
-    },
-    {
-      "id": "lhrpymp2",
-      "a": "mkbm6fuq",
-      "b": "ph6wos5f",
-      "dir": "a2b"
-    },
-    {
       "id": "lyokkyca",
       "a": "ph6wos5f",
-      "b": "k2dxjw6b"
+      "b": "k2dxjw6b",
+      "dir": "a2b"
     },
     {
       "id": "polla3fx",
@@ -343,7 +333,8 @@
     {
       "id": "ulrhikkm",
       "a": "1hws7260",
-      "b": "i6d6s3ad"
+      "b": "i6d6s3ad",
+      "dir": "a2b"
     },
     {
       "id": "b5a88pp2",
@@ -354,7 +345,8 @@
     {
       "id": "a2p4ngmd",
       "a": "1hws7260",
-      "b": "yelo2bne"
+      "b": "yelo2bne",
+      "dir": "a2b"
     },
     {
       "id": "avpcfkvx",
@@ -368,17 +360,6 @@
       "b": "ofonkurj"
     },
     {
-      "id": "ils6f9fw",
-      "a": "nan0pxj3",
-      "b": "3tygy8i6"
-    },
-    {
-      "id": "bkqsfe62",
-      "a": "3tygy8i6",
-      "b": "cf2u39o8",
-      "dir": "a2b"
-    },
-    {
       "id": "4l62zbmb",
       "a": "cf2u39o8",
       "b": "o7n3cf4l",
@@ -388,32 +369,118 @@
     {
       "id": "39hhny5k",
       "a": "nan0pxj3",
-      "b": "cgho4hxp"
-    },
-    {
-      "id": "ghy5jcdt",
-      "a": "cgho4hxp",
-      "b": "2lr7y1rh"
+      "b": "cgho4hxp",
+      "dir": "a2b"
     },
     {
       "id": "o5vlsq6k",
       "a": "cgho4hxp",
-      "b": "vuxjocxc"
+      "b": "vuxjocxc",
+      "dir": "a2b"
     },
     {
-      "id": "cyp6ch16",
+      "id": "rr4sqkmb",
+      "a": "f19ij30z",
+      "b": "q7aoy9s6",
+      "dir": "a2b"
+    },
+    {
+      "id": "cbyf9wtt",
+      "a": "2lr7y1rh",
+      "b": "76zj0jrm",
+      "dir": "a2b"
+    },
+    {
+      "id": "i7bpf127",
+      "a": "2lr7y1rh",
+      "b": "b5vk46rl",
+      "dir": "a2b"
+    },
+    {
+      "id": "drv0pas3",
       "a": "cgho4hxp",
-      "b": "f19ij30z"
+      "b": "gjf1ie4m",
+      "dir": "a2b"
     },
     {
-      "id": "l1w6w2dq",
-      "a": "2lr7y1rh",
-      "b": "76zj0jrm"
+      "id": "a5du5ntl",
+      "a": "gjf1ie4m",
+      "b": "f19ij30z",
+      "dir": "a2b"
     },
     {
-      "id": "01e6rs6q",
-      "a": "2lr7y1rh",
-      "b": "b5vk46rl"
+      "id": "35or3igv",
+      "a": "gjf1ie4m",
+      "b": "2lr7y1rh",
+      "dir": "a2b"
+    },
+    {
+      "id": "kca6g8ym",
+      "a": "cgho4hxp",
+      "b": "67fao5sh",
+      "dir": "a2b"
+    },
+    {
+      "id": "br4cl370",
+      "a": "gjf1ie4m",
+      "b": "ph6wos5f",
+      "dir": "a2b"
+    },
+    {
+      "id": "3ngpviw0",
+      "a": "67fao5sh",
+      "b": "e7iy1q3k",
+      "dir": "b2a"
+    },
+    {
+      "id": "n334w6uv",
+      "a": "vuxjocxc",
+      "b": "9o8qnusi",
+      "dir": "a2b"
+    },
+    {
+      "id": "mt3a0mcr",
+      "a": "67fao5sh",
+      "b": "mkbm6fuq",
+      "dir": "a2b"
+    },
+    {
+      "id": "i9tbrso0",
+      "a": "gjf1ie4m",
+      "b": "ic6pm1hn"
+    },
+    {
+      "id": "zj5l96kn",
+      "a": "ic6pm1hn",
+      "b": "ph6wos5f",
+      "dir": "a2b"
+    },
+    {
+      "id": "7rvzhyd3",
+      "a": "gjf1ie4m",
+      "b": "e7iy1q3k"
+    },
+    {
+      "id": "1ojqhv2n",
+      "a": "gjf1ie4m",
+      "b": "wqkdoa3z"
+    },
+    {
+      "id": "hdkvv2h0",
+      "a": "gjf1ie4m",
+      "b": "3tygy8i6",
+      "dir": "a2b"
+    },
+    {
+      "id": "g9eb611x",
+      "a": "3tygy8i6",
+      "b": "wqkdoa3z",
+      "dir": "a2b"
+    },
+    {
+      "id": "ri119510",
+      "a": "wqkdoa3z",
+      "b": "cf2u39o8"
     }
   ],
   "parentMap": "root"

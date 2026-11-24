@@ -19,11 +19,18 @@ const RESERVED = new Set([NOTES_DIR, MAPS_DIR])
 const app = express()
 app.use(express.json({ limit: '5mb' }))
 
-// Editing is locked until a client unlocks with the password. Tokens live in memory only, so a server restart
-// locks everyone, and the page keeps its token in memory only, so a reload locks that session again.
+// Editing is locked until a client unlocks with the password. A token is valid for 8 hours and the page keeps it
+// in localStorage, so a reload stays unlocked. Tokens live in server memory only, so a server restart locks everyone.
 const EDIT_PASSWORD = process.env.EDIT_PASSWORD || 'duck-edit'
 if (!process.env.EDIT_PASSWORD) console.warn('EDIT_PASSWORD is not set, using the default password. Set it before exposing the app.')
-const editTokens = new Set()
+const TOKEN_TTL = 8 * 60 * 60 * 1000
+const editTokens = new Map() // token -> expiry timestamp
+const validToken = (t) => {
+  const exp = editTokens.get(t)
+  if (exp === undefined) return false
+  if (exp <= Date.now()) { editTokens.delete(t); return false }
+  return true
+}
 const safeEqual = (a, b) => {
   const ha = crypto.createHash('sha256').update(String(a)).digest()
   const hb = crypto.createHash('sha256').update(String(b)).digest()
@@ -38,12 +45,19 @@ app.post('/api/unlock', (req, res) => {
     return res.status(401).json({ error: 'Wrong password' })
   }
   const token = crypto.randomBytes(24).toString('hex')
-  editTokens.add(token)
-  res.json({ token })
+  const expires = Date.now() + TOKEN_TTL
+  editTokens.set(token, expires)
+  for (const [t, exp] of editTokens) if (exp <= Date.now()) editTokens.delete(t)
+  res.json({ token, expires })
+})
+// Lets a reloaded page check that its stored token is still accepted.
+app.get('/api/session', (req, res) => {
+  if (!validToken(req.get('x-edit-token'))) return res.status(401).json({ error: 'Session expired' })
+  res.json({ ok: true })
 })
 app.use('/api', (req, res, next) => {
   if (req.method === 'GET' || req.method === 'HEAD') return next()
-  if (!editTokens.has(req.get('x-edit-token'))) return res.status(401).json({ error: 'Editing is locked. Enter the password to edit.' })
+  if (!validToken(req.get('x-edit-token'))) return res.status(401).json({ error: 'Editing is locked. Enter the password to edit.' })
   next()
 })
 
@@ -197,9 +211,14 @@ app.put('/api/image', express.raw({ type: Object.keys(IMAGE_TYPES), limit: '10mb
   const { abs } = resolveTopic(req.query.path)
   const ext = IMAGE_TYPES[String(req.headers['content-type']).split(';')[0]]
   if (!ext || !Buffer.isBuffer(req.body) || !req.body.length) throw new HttpError(400, 'Unsupported image type')
-  const name = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}.${ext}`
+  // Images are named <box id>_<index>, the index continuing after the box's highest existing one.
+  const id = String(req.query.id || '')
+  if (!/^[\w-]+$/.test(id)) throw new HttpError(400, 'Invalid box id')
   const dir = path.join(abs, NOTES_DIR, IMG_DIR)
   await fs.mkdir(dir, { recursive: true })
+  const prefix = `${id}_`
+  const used = (await fs.readdir(dir)).map((f) => (f.startsWith(prefix) ? Number(f.slice(prefix.length).split('.')[0]) : 0)).filter(Number.isInteger)
+  const name = `${prefix}${Math.max(0, ...used) + 1}.${ext}`
   await fs.writeFile(path.join(dir, name), req.body)
   res.json({ name })
 }))

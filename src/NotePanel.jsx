@@ -76,7 +76,7 @@ export default function NotePanel({ topic, node, onPatch, onClose, onError, read
   const addImage = async (file) => {
     const at = editor.current?.selectionStart ?? text.length
     try {
-      const name = await api.uploadImage(topic, file)
+      const name = await api.uploadImage(topic, node.id, file)
       const next = `${text.slice(0, at)}
 ![image](image:${name})
 ${text.slice(at)}`
@@ -134,7 +134,10 @@ ${text.slice(at)}`
           Link
           <input value={node.link || ''} placeholder="https://" onChange={(e) => onPatch({ link: e.target.value })} />
         </label>
-        <label className="check"><input type="checkbox" checked={!!node.filled} onChange={(e) => onPatch({ filled: e.target.checked })} /> Solid fill</label>
+        <div className="checks">
+          <label className="check"><input type="checkbox" checked={!!node.filled} onChange={(e) => onPatch({ filled: e.target.checked })} /> Solid fill</label>
+          <label className="check" title="Show this box only in this map. It is left out when the map is seen from the other level (outer map / sub-map), but still counts towards Boxes deep."><input type="checkbox" checked={!!node.hidden} onChange={(e) => onPatch({ hidden: e.target.checked })} /> This view only</label>
+        </div>
         <div className="swatches" role="radiogroup" aria-label="Node colour">
           <button role="radio" aria-checked={node.color === '#1b2330'} className={node.color === '#1b2330' ? 'on' : ''} style={{ background: '#1b2330' }} onClick={() => onPatch({ color: '#1b2330' })} title="Ink" />
           {PALETTE.map((c) => (
@@ -147,6 +150,7 @@ ${text.slice(at)}`
       <div className="tabs" role="tablist">
         {!readOnly && <button role="tab" aria-selected={mode === 'write'} onClick={() => setMode('write')}>Write</button>}
         <button role="tab" aria-selected={mode === 'preview'} onClick={() => setMode('preview')}>Preview</button>
+        <span className="node-id" title="Box id (images are named <id>_<n>)">{node.id}</span>
         {node.link && <a href={node.link} target="_blank" rel="noopener noreferrer">Open link</a>}
       </div>
 

@@ -1,6 +1,23 @@
-// Edit token from the password prompt. Kept in memory on purpose: reloading the page locks editing again.
+// Edit token from the password prompt. Stored in localStorage with its expiry (8h, enforced by the server too),
+// so reloading the page keeps editing unlocked until it runs out.
+const TOKEN_KEY = 'editSession'
 let editToken = null
-export const setEditToken = (t) => { editToken = t }
+export const setEditToken = (t, expires) => {
+  editToken = t
+  try {
+    if (t) localStorage.setItem(TOKEN_KEY, JSON.stringify({ token: t, expires }))
+    else localStorage.removeItem(TOKEN_KEY)
+  } catch { /* storage unavailable: the session just lasts until reload */ }
+}
+// Reads a stored, unexpired token into memory. Returns whether there is one (the server still has to confirm it).
+export const loadEditToken = () => {
+  try {
+    const s = JSON.parse(localStorage.getItem(TOKEN_KEY))
+    if (s?.token && s.expires > Date.now()) { editToken = s.token; return true }
+  } catch { /* ignore */ }
+  setEditToken(null)
+  return false
+}
 
 async function call(method, url, body) {
   const res = await fetch(url, {
@@ -19,6 +36,7 @@ const q = (params) => new URLSearchParams(params).toString()
 
 export const api = {
   unlock: (password) => call('POST', '/api/unlock', { password }),
+  session: () => call('GET', '/api/session'),
   tree: () => call('GET', '/api/tree'),
   createFolder: (path) => call('POST', '/api/folder', { path }),
   renameFolder: (from, to) => call('POST', '/api/rename', { from, to }),
@@ -30,8 +48,8 @@ export const api = {
   saveNote: (path, id, content) => call('PUT', `/api/note?${q({ path, id })}`, { content }),
   deleteNote: (path, id) => call('DELETE', `/api/note?${q({ path, id })}`),
   // Stores a pasted image next to the topic's notes and returns the file name to reference from markdown.
-  uploadImage: async (path, blob) => {
-    const res = await fetch(`/api/image?${q({ path })}`, { method: 'PUT', headers: { 'Content-Type': blob.type, ...(editToken ? { 'X-Edit-Token': editToken } : {}) }, body: blob })
+  uploadImage: async (path, id, blob) => {
+    const res = await fetch(`/api/image?${q({ path, id })}`, { method: 'PUT', headers: { 'Content-Type': blob.type, ...(editToken ? { 'X-Edit-Token': editToken } : {}) }, body: blob })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`)
     return data.name

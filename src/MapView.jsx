@@ -197,6 +197,8 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
   // directly to it, clicking one of those moves on. `trail` is the history, so Back returns to the earlier spot.
   const [trail, setTrail] = useState(null) // null = off, else [{ id, open }]
   const play = trail ? trail[trail.length - 1] : null
+  const [jumpOpen, setJumpOpen] = useState(false) // bookmark list next to the name in the playthrough bar
+  const jumpRef = useRef(null)
   // Descriptions are wrapped by measuring text, so measure again once the hand-written font has loaded.
   const [fontTick, setFontTick] = useState(0)
   useEffect(() => {
@@ -271,7 +273,8 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
     const edges = []
     const have = new Set()
     const addGhost = (id, n, centre, anchor, owner) => {
-      if (have.has(id)) return
+      // A hidden box still counts towards the depth, it just is not drawn from the other level.
+      if (have.has(id) || n.hidden) return
       have.add(id)
       const w = nodeWidth(n)
       const h = nodeHeight(n)
@@ -356,7 +359,9 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
         edges.push(edge(`up-${l.id}`, l.b, ghostId(o.id), l, true))
       })
     }
-    return { nodes, edges }
+    // Links to a box that was left out (hidden) would dangle.
+    const drawn = (id) => !(id.startsWith('ghost:') || id.startsWith('up:')) || have.has(id)
+    return { nodes, edges: edges.filter((e) => drawn(e.source) && drawn(e.target)) }
   }, [map.nodes, map.links, map.center, subs, parent, mapId, depth])
 
   const nodes = useMemo(() => [...map.nodes.map((n) => {
@@ -466,10 +471,21 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
   }, [litIds, fitView, playNote])
   useEffect(() => {
     if (!trail) return
-    const onKey = (e) => { if (e.key === 'Escape' && !e.target.closest?.('input, textarea')) setTrail(null) }
+    const onKey = (e) => {
+      if (e.key !== 'Escape' || e.target.closest?.('input, textarea')) return
+      if (jumpOpen) setJumpOpen(false)
+      else setTrail(null)
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [trail])
+  }, [trail, jumpOpen])
+  useEffect(() => { if (!trail) setJumpOpen(false) }, [trail])
+  useEffect(() => {
+    if (!jumpOpen) return
+    const away = (e) => { if (!jumpRef.current?.contains(e.target)) setJumpOpen(false) }
+    window.addEventListener('pointerdown', away)
+    return () => window.removeEventListener('pointerdown', away)
+  }, [jumpOpen])
 
   // One-off: route every connector around the boxes as they are now. Later moves do not touch the routes.
   const rearrangeLinks = () => {
@@ -621,7 +637,21 @@ function Canvas({ topic, map, mapId, chain, goToLevel, selection, setSelection, 
         {trail && (
           <div className="play-bar" role="toolbar" aria-label="Playthrough">
             <button disabled={trail.length < 2} onClick={() => setTrail((t) => t.slice(0, -1))}>← Back</button>
-            <span>{map.nodes.find((n) => n.id === play.id)?.title}{play.open ? '' : ' · click to light its links'}</span>
+            <div className="play-jump" ref={jumpRef}>
+              <span>{map.nodes.find((n) => n.id === play.id)?.title}{play.open ? '' : ' · click to light its links'}</span>
+              <button className="play-jump-btn" aria-haspopup="menu" aria-expanded={jumpOpen} aria-label="Jump to a bookmark" title="Jump to a bookmark" onClick={() => setJumpOpen((o) => !o)}>▾</button>
+              {jumpOpen && (
+                <div className="menu play-menu" role="menu">
+                  {bookmarks.length === 0 && <p className="menu-none">No bookmarks in this map.</p>}
+                  {bookmarks.map((n) => (
+                    <button key={n.id} role="menuitem" className={n.id === play.id ? 'on' : ''} onClick={() => {
+                      setJumpOpen(false)
+                      if (n.id !== play.id) setTrail((t) => [...t, { id: n.id, open: true }])
+                    }}>{n.title}</button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button onClick={() => setTrail(null)}>Exit</button>
           </div>
         )}

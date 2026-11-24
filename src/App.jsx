@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { api, setEditToken } from './api.js'
+import { api, setEditToken, loadEditToken } from './api.js'
 import { NODE_H, PALETTE, nodeWidth, uid, upgradeMap } from './layout.js'
 import Sidebar from './Sidebar.jsx'
 import MapView from './MapView.jsx'
@@ -27,9 +27,13 @@ export default function App() {
   const selectedId = selection.length === 1 ? selection[0] : null
   const [selectedLink, setSelectedLink] = useState(null)
   const [playing, setPlaying] = useState(false) // playthrough: view only, shortcuts off
-  // The password is asked once per page load (`authed`); after that each topic has its own lock. Every topic starts
-  // locked and nothing is persisted, so a reload locks everything again.
+  // The password is asked once per 8-hour session (`authed`, restored after a reload); after that each topic has its
+  // own lock. Every topic starts locked, so a reload locks the topics again.
   const [authed, setAuthed] = useState(false)
+  useEffect(() => {
+    if (!loadEditToken()) return
+    api.session().then(() => setAuthed(true)).catch(() => setEditToken(null))
+  }, [])
   const [openTopics, setOpenTopics] = useState(() => new Set())
   const editable = authed && !!topic && openTopics.has(topic)
   const editRef = useRef(false)
@@ -49,8 +53,8 @@ export default function App() {
   const setEditingId = useCallback((v) => { if (v === null || editRef.current) setEditingIdRaw(v) }, [])
   const setEditingLink = useCallback((v) => { if (v === null || editRef.current) setEditingLinkRaw(v) }, [])
   const unlock = useCallback(async (password) => {
-    const { token } = await api.unlock(password)
-    setEditToken(token)
+    const { token, expires } = await api.unlock(password)
+    setEditToken(token, expires)
     setAuthed(true)
   }, [])
   const [status, setStatus] = useState('idle') // idle | saving | saved
@@ -79,10 +83,12 @@ export default function App() {
     }
   }, [fail])
 
-  const updateMap = useCallback((fn) => {
-    if (!editRef.current) return
-    const next = fn(mapRef.current)
-    if (next === mapRef.current) return
+  // Undo/redo history for the open map. Edits made in quick succession (a drag, typing) count as one step.
+  const undoStack = useRef([])
+  const redoStack = useRef([])
+  const lastEdit = useRef(0)
+
+  const commitMap = useCallback((next) => {
     mapRef.current = next
     setMap(next)
     const { topic: t, mapId: m, chain: c } = locRef.current
@@ -94,6 +100,50 @@ export default function App() {
     timer.current = setTimeout(flush, 600)
   }, [flush])
 
+  const updateMap = useCallback((fn) => {
+    if (!editRef.current) return
+    const prev = mapRef.current
+    const next = fn(prev)
+    if (next === prev) return
+    const now = Date.now()
+    if (now - lastEdit.current > 600) {
+      undoStack.current.push(prev)
+      if (undoStack.current.length > 100) undoStack.current.shift()
+    }
+    lastEdit.current = now
+    redoStack.current = []
+    commitMap(next)
+  }, [commitMap])
+
+  const stepHistory = useCallback((from, to) => {
+    if (!editRef.current || !from.current.length) return
+    const target = from.current.pop()
+    to.current.push(mapRef.current)
+    lastEdit.current = 0
+    commitMap(target)
+    setSelection([])
+    setSelectedLink(null)
+    setEditingIdRaw(null)
+    setEditingLinkRaw(null)
+  }, [commitMap])
+  const undo = useCallback(() => stepHistory(undoStack, redoStack), [stepHistory])
+  const redo = useCallback(() => stepHistory(redoStack, undoStack), [stepHistory])
+
+  // Ctrl/Cmd+Z undoes, Ctrl+Shift+Z or Ctrl+Y redoes. Text fields keep their own native undo.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return
+      if (e.target.closest?.('input, textarea, select, [contenteditable="true"]')) return
+      const k = e.key.toLowerCase()
+      if (k === 'z' && !e.shiftKey) undo()
+      else if ((k === 'z' && e.shiftKey) || k === 'y') redo()
+      else return
+      e.preventDefault()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [undo, redo])
+
   const reloadTree = useCallback(() => api.tree().then(setTree).catch(fail), [fail])
   useEffect(() => { reloadTree() }, [reloadTree])
 
@@ -104,6 +154,8 @@ export default function App() {
     setSelectedLink(null)
     setEditingId(null)
     setEditingLink(null)
+    undoStack.current = []
+    redoStack.current = []
     if (!topic) {
       mapRef.current = null
       setMap(null)
@@ -357,11 +409,17 @@ export default function App() {
     }
   }, [flush])
 
+  const [navHidden, setNavHidden] = useState(() => { try { return localStorage.getItem('navHidden') === '1' } catch { return false } })
+  const setNav = (hidden) => {
+    setNavHidden(hidden)
+    try { localStorage.setItem('navHidden', hidden ? '1' : '0') } catch { /* ignore */ }
+  }
+
   const selected = map && selectedId ? map.nodes.find((n) => n.id === selectedId) : null
   const pickedLink = map && selectedLink && !selected ? map.links.find((l) => l.id === selectedLink) : null
 
   return (
-    <div className={`app ${selected || pickedLink ? 'with-notes' : ''}`}>
+    <div className={`app ${selected || pickedLink ? 'with-notes' : ''} ${navHidden ? 'nav-hidden' : ''}`}>
       <Sidebar
         tree={tree}
         active={topic}
@@ -374,8 +432,14 @@ export default function App() {
         openTopics={openTopics}
         onToggleLock={toggleLock}
         onUnlock={unlock}
+        onCollapse={() => setNav(true)}
       />
       <main className="stage">
+        {navHidden && (
+          <button className="nav-expand" onClick={() => setNav(false)} aria-label="Show menu" title="Show menu">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3l5 5-5 5" /></svg>
+          </button>
+        )}
         {map && loadedKey === `${topic}:${mapId}` ? (
           <MapView
             key={`${topic}:${mapId}`}
